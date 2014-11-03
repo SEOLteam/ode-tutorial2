@@ -1,5 +1,37 @@
 [
     {
+        "unit": "Introducing Simple Harmonic Motion",
+        "topic": "Learning Objective 1: I can model simple harmonic motion using differential equations.",
+        "p1": "There are a lot of systems that come up commonly in science and engineering that can be easily modeled using differential equations. One system that can be used to model many different applications is that of a harmonic oscillator - something moving back and forth in a periodic way. Let's start by by examining the simplest version of this - simple harmonic motion.",
+        "p2": "The system that we motion is a mass (i.e. a block, or a weight, or an atom) attached to a spring. This system is shown in the simulation below. Take a few minutes to play around with it now and see how it works.",
+        "p3": "",
+        "mc": {
+            "q": "",
+            "ans": "",
+            "a": "",
+            "b": "",
+            "c": "",
+            "d": "",
+            "e": ""
+        }
+    },
+    {
+        "unit": "Check Understanding: Simple Harmonic Motion",
+        "topic": "Learning Objective 1: I can model simple harmonic motion using differential equations.",
+        "p1": "Reset the simulation to its default configuration, then answer the following questions using the simulation.",
+        "p2": "Leaving all other parameters constant, drag the mass to its upper limit on the x-axis and click \"go\". Repeat chosing instead a small value of x.",
+        "p3": "",
+        "mc": {
+            "q": "Which aspect of the system is effected by changing the starting x-value?",
+            "ans": "Amplitude",
+            "a": "Period",
+            "b": "Frequency",
+            "c": "Amplitude",
+            "d": "",
+            "e": ""
+        }
+    },
+    {
         "unit": "Unit 1",
         "topic": "Topic 1",
         "p1": "Sentences la la la",
