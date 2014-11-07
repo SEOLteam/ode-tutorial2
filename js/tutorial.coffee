@@ -1,4 +1,5 @@
 $(() ->
+
   model = {}
 
   setUpBody = ->
@@ -14,6 +15,7 @@ $(() ->
       orientation: 'horizontal'
       limit: 10
 
+  calculator = null
   setUpCalculator = ->
     elt = $('#calculator')
     calculator = Desmos.Calculator(elt)
@@ -24,6 +26,11 @@ $(() ->
     calculator.setExpression
       id: 'ab'
       latex: '(a,b)'
+
+
+    calculator.setExpression
+      id: 'k'
+      latex: 'k=1'
 
     calculator.setExpression
       id: 'a'
@@ -39,11 +46,30 @@ $(() ->
 
     model.calculator = calculator
 
+  snapsvg = Snap('#svg')
+  CIRCLE_EQUILIBRIUM = 400
   setUpSimulation = ->
-    s = Snap('#svg')
     C_RADIUS = 50
-    rect = s.rect(400, 50, 5, 80)
-    circle = s.circle(400 + 5 / 2.0, 50 + 80 / 2.0, C_RADIUS)
+    rect = snapsvg.rect(40, 30, 5, C_RADIUS * 2 + 20)
+    spring = null
+    Snap.load("/img/simple_spring.svg", (frag) =>
+      spring = frag.select("g")
+      snapsvg.append( spring )
+      snapsvg.group(circle, spring)
+    )
+    circle = snapsvg.circle(CIRCLE_EQUILIBRIUM + C_RADIUS, 50 + 80 / 2.0, C_RADIUS)
+#    slider2 = snapsvg.slider(
+#      sliderId: "k_slider"
+#      capSelector: "#cap"
+#      filename: "img/slider2.svg"
+#      x: "40"
+#      y: "200"
+#      min: "0"
+#      max: "400"
+##      onDragEndFunc: myDragEndFunc
+##      onDragStartFunc: myDragStartFunc
+##      onDragFunc: myDragFunc
+#    )
     circle.attr({
       fill: "#bada00",
       stroke: "#000",
@@ -62,7 +88,10 @@ $(() ->
 
     notDragging = true
 
+    velocity = 0
+
     start = ->
+      velocity = 0
       notDragging = false
       @data 'origTransform', @transform().local
       return
@@ -75,27 +104,24 @@ $(() ->
     # TODO rect.drag move, start, stop
     circle.drag move, start, stop
 
-    #spring = Snap.load("/img/simple_spring.svg")
-    velocity = 0
     setInterval(() ->
       return null unless notDragging
-      K = 0.007
-      x = circle.getBBox().x
-      dx = rect.getBBox().x - x - C_RADIUS
-      a = K * dx
+      K = parseFloat(calculator.getState().expressions.list[2].latex.substr(2)) / 1000
+      dx = CIRCLE_EQUILIBRIUM - circle.getBBox().x
+      a = if Math.abs(dx) > 3.0 then K * dx else 0.0
       velocity += a
-      velocity = 0 if Math.abs(velocity) < 0.5
-      circle.data 'origTransform', circle.transform().local
       circle.attr
-        transform: circle.data('origTransform') + ((if circle.data('origTransform') then 'T' else 't')) + [
+        transform: circle.transform().local + 't' + [
           velocity,
           0
         ]
+#      spring.node.attr
+#        transform: spring.node.transform().local + 's' + (circle.getBBox().x / 2.0)
       pos = (circle.node.getBoundingClientRect().left - 700) / 200
       model.calculator.setExpression
         id: 'a'
         latex: 'a=' + pos
-    , 100)
+    , 20)
 
   setUpBody()
   setUpCalculator()
