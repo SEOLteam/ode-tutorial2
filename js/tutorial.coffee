@@ -1,17 +1,29 @@
 $(() ->
-
   model = {} # TODO use
 
   MAX_T = 4.0
 
   setUpBody = ->
-    $('#tutorial')
+    t = $('#tutorial')
     .width '100%'
     .height 800
-    .split
+    if window.location.hash == '#/simulation'
+      $('#svg')
+      .width '100%'
+      .height 800
+      setUpSimulation()
+    else if window.location.hash == '#/calculator'
+      $('#calculator')
+      .width '100%'
+      .height 800
+      setUpCalculator()
+    else
+      t.split
         orientation: 'horizontal'
         limit: 100
         position: '50%'
+      setUpCalculator()
+      setUpSimulation()
 
   calculator = null
   setUpCalculator = ->
@@ -170,25 +182,25 @@ $(() ->
   Y_OFFSET = 20
   setUpSimulation = ->
     snapsvg.rect(40, 30, 5, C_RADIUS * 2 + 20)
-#    spring = null
-#    Snap.load("/img/simple_spring.svg", (frag) =>
-#      spring = frag.select("g")
-#      snapsvg.append( spring )
-#      snapsvg.group(circle, spring)
-#    )
+    #    spring = null
+    #    Snap.load("/img/simple_spring.svg", (frag) =>
+    #      spring = frag.select("g")
+    #      snapsvg.append( spring )
+    #      snapsvg.group(circle, spring)
+    #    )
     circle = snapsvg.circle(CIRCLE_EQUILIBRIUM + C_RADIUS, C_RADIUS + Y_OFFSET, C_RADIUS)
-#    slider2 = snapsvg.slider(
-#      sliderId: "k_slider"
-#      capSelector: "#cap"
-#      filename: "img/slider2.svg"
-#      x: "40"
-#      y: "200"
-#      min: "0"
-#      max: "400"
-##      onDragEndFunc: myDragEndFunc
-##      onDragStartFunc: myDragStartFunc
-##      onDragFunc: myDragFunc
-#    )
+    #    slider2 = snapsvg.slider(
+    #      sliderId: "k_slider"
+    #      capSelector: "#cap"
+    #      filename: "img/slider2.svg"
+    #      x: "40"
+    #      y: "200"
+    #      min: "0"
+    #      max: "400"
+    ##      onDragEndFunc: myDragEndFunc
+    ##      onDragStartFunc: myDragStartFunc
+    ##      onDragFunc: myDragFunc
+    #    )
     circle.attr({
       fill: "#bada00",
       stroke: "#000",
@@ -236,7 +248,7 @@ $(() ->
 
     getVal = (id) ->
       res = null
-      calculator.getState().expressions.list.forEach( (elem) ->
+      calculator.getState().expressions.list.forEach((elem) ->
         res = elem if elem.id == id
       )
       return parseFloat(res.latex.substr(res.latex.indexOf('=') + 1))
@@ -250,10 +262,10 @@ $(() ->
       model.calculator.setExpression
         id: 't_c'
         latex: 't_c=' + currT.toFixed(2)
-#      K = parseFloat(calculator.getState().expressions.list[2].latex.substr(2))
-#      dx = CIRCLE_EQUILIBRIUM - circle.getBBox().x
-#      a = if Math.abs(dx) > 3.0 then K * dx else 0.0
-#      velocity += a
+      #      K = parseFloat(calculator.getState().expressions.list[2].latex.substr(2))
+      #      dx = CIRCLE_EQUILIBRIUM - circle.getBBox().x
+      #      a = if Math.abs(dx) > 3.0 then K * dx else 0.0
+      #      velocity += a
       p_c = 10 * getVal('A') * Math.cos(currT * Math.sqrt(getVal('k') / getVal('m')))
       circle.attr
         transform: 'T' + [
@@ -269,6 +281,4 @@ $(() ->
     , INTERVAL_MS)
 
   setUpBody()
-  setUpCalculator()
-  setUpSimulation()
 )
