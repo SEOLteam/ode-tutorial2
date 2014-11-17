@@ -1,34 +1,34 @@
 $(() ->
+  getPage = ->
+    location.hash.split('?')[0].substr(2)
+
+  getHashParams = ->
+    hash = location.hash.split('?')
+    return {} unless len(hash) > 2
+    state = {}
+    for pair in hash[1].split("&")
+      [key, val] = pair.split("=").map(decodeURIComponent)
+      state[key] = val
+    state
+
   model = {} # TODO use
 
   MAX_T = 4.0
 
-  setUpBody = ->
-    t = $('#tutorial')
-    .width '100%'
-    .height 800
-    if window.location.hash == '#/simulation'
-      $('#svg')
-      .width '100%'
-      .height 800
-      setUpSimulation()
-    else if window.location.hash == '#/calculator'
-      $('#calculator')
-      .width '100%'
-      .height 800
-      setUpCalculator()
-    else
-      t.split
-        orientation: 'horizontal'
-        limit: 100
-        position: '50%'
-      setUpCalculator()
-      setUpSimulation()
-
   calculator = null
-  setUpCalculator = ->
-    elt = $('#calculator')
-    calculator = Desmos.Calculator(elt)
+  setUpCalculator = (calcNode) ->
+#    elt = $(calcNode)
+    calculator = Desmos.Calculator(calcNode,
+      keypad: false
+      graphpaper: true
+      expressions: true
+      settingsMenu: false
+      zoomButtons: false
+      expressionsTopbar: false
+      solutions: false
+      border: true
+      lockViewport: true
+    )
     calculator.setState(
       graph:
         showGrid: true
@@ -40,12 +40,12 @@ $(() ->
         degreeMode: false
         xAxisArrows: "none"
         yAxisArrows: "none"
-        xAxisLabel: ""
-        yAxisLabel: ""
+        xAxisLabel: "Time (t)"
+        yAxisLabel: "Position (x)"
         xAxisNumbers: true
         yAxisNumbers: true
         polarNumbers: true
-        projectorMode: false
+        projectorMode: true
         squareAxes: true
         viewport:
           xmin: 0.0
@@ -169,18 +169,14 @@ $(() ->
           }
         ]
     )
+    calculator # TODO NOOO!!
 
-    $('.splitter_panel')# Does not work for changes in vertical.
-    .bind 'splitter.resize', () ->
-      calculator.resize()
-
-    model.calculator = calculator
-
-  snapsvg = Snap('#svg')
+  snapsvg = null
   CIRCLE_EQUILIBRIUM = 300
   C_RADIUS = 50
   Y_OFFSET = 20
-  setUpSimulation = ->
+  setUpSimulation = (node) ->
+    snapsvg = Snap(node)
     snapsvg.rect(40, 30, 5, C_RADIUS * 2 + 20)
     #    spring = null
     #    Snap.load("/img/simple_spring.svg", (frag) =>
@@ -208,8 +204,8 @@ $(() ->
     });
     circle.attr
       transform: 'T' + [
-          CIRCLE_EQUILIBRIUM + C_RADIUS,
-          C_RADIUS
+        CIRCLE_EQUILIBRIUM + C_RADIUS,
+        C_RADIUS
       ]
     pos = 0
     Graph_A = null
@@ -253,32 +249,88 @@ $(() ->
       )
       return parseFloat(res.latex.substr(res.latex.indexOf('=') + 1))
 
-    INTERVAL_MS = 60
-    MILLI_PER_SEC = 1000
-    setInterval(() ->
-      return unless isBouncing
-      currT += INTERVAL_MS / MILLI_PER_SEC
-      currT = 0 if currT > MAX_T
-      model.calculator.setExpression
-        id: 't_c'
-        latex: 't_c=' + currT.toFixed(2)
-      #      K = parseFloat(calculator.getState().expressions.list[2].latex.substr(2))
-      #      dx = CIRCLE_EQUILIBRIUM - circle.getBBox().x
-      #      a = if Math.abs(dx) > 3.0 then K * dx else 0.0
-      #      velocity += a
-      p_c = 10 * getVal('A') * Math.cos(currT * Math.sqrt(getVal('k') / getVal('m')))
-      circle.attr
-        transform: 'T' + [
-            CIRCLE_EQUILIBRIUM + C_RADIUS + p_c * 300,
-            C_RADIUS
-        ]
-#      spring.node.attr
-#        transform: spring.node.transform().local + 's' + (circle.getBBox().x / 2.0)
-#      pos = (circle.node.getBoundingClientRect().left - 700) / 200
-#      model.calculator.setExpression
-#        id: 'A'
-#        latex: 'A=' + pos / 2.0
-    , INTERVAL_MS)
+  #    INTERVAL_MS = 60
+  #    MILLI_PER_SEC = 1000
+  #    setInterval(() ->
+  #      return unless isBouncing
+  #      currT = 0 if currT > MAX_T
+  #      model.calculator.setExpression
+  #        id: 't_c'
+  #        latex: 't_c=' + currT.toFixed(2)
+  #      K = parseFloat(calculator.getState().expressions.list[2].latex.substr(2))
+  #      dx = CIRCLE_EQUILIBRIUM - circle.getBBox().x
+  #      a = if Math.abs(dx) > 3.0 then K * dx else 0.0
+  #      velocity += a
+  #      p_c = 10 * getVal('A') * Math.cos(currT * Math.sqrt(getVal('k') / getVal('m')))
+  #      circle.attr
+  #        transform: 'T' + [
+  #          CIRCLE_EQUILIBRIUM + C_RADIUS + p_c * 300,
+  #          C_RADIUS
+  #        ]
+  #      spring.node.attr
+  #        transform: spring.node.transform().local + 's' + (circle.getBBox().x / 2.0)
+  #      pos = (circle.node.getBoundingClientRect().left - 700) / 200
+  #      model.calculator.setExpression
+  #        id: 'A'
+  #        latex: 'A=' + pos / 2.0
 
-  setUpBody()
+  #setUpBody()
+
+  Simulation = React.createClass(
+    componentDidMount: ->
+      setUpSimulation(@getDOMNode())
+    render: ->
+      React.createElement('svg', style: {width: '100%', height: '400px'})
+  )
+
+  Calculator = React.createClass(
+    updateExpression: (id, val) ->
+      @desmosCalc.setExpression
+        id: id
+        latex: "#{id}=#{val.toFixed(2)}"
+
+    componentWillReceiveProps: (nextProps) ->
+      if @desmosCalc
+        @updateExpression id, nextProps[id] for id in ['t_c', 'A', 'k', 'm'] when nextProps[id] != @props[id]
+
+    componentDidMount: ->
+      @desmosCalc = setUpCalculator(@getDOMNode())
+
+    render: ->
+      React.createElement('div', style: {width: '100%', height: '400px'})
+  )
+
+  SpringMass = React.createClass(
+    getInitialState: ->
+      k: 10   # Spring constant
+      m: 10   # Mass
+      A: 1    # Amplitude
+      t_c: 0  # Current time
+      p: 0    # Current position
+      page: getPage()
+
+    tick: ->
+      new_t_c = @state.t_c + @props.periodMs / 1000 # Milliseconds per second
+      new_t_c = 0.0 if new_t_c > 4.0
+      @setState t_c: new_t_c
+
+    componentDidMount: ->
+      @interval = setInterval(@tick, @props.periodMs)
+
+    componentWillUnmount: ->
+      clearInterval @interval
+
+    render: ->
+      if @state.page == 'calculator'
+        React.createElement(Calculator, @state)
+      else if @state.page == 'simulation'
+        React.createElement(Simulation, @state)
+      else
+        React.createElement('div', null,
+          React.createElement(Calculator, @state),
+          React.createElement(Simulation, @state)
+        )
+  )
+
+  React.render(React.createElement(SpringMass, display: location.hash, periodMs: 50), document.getElementById('app'));
 )

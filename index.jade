@@ -5,14 +5,10 @@ head
     meta(name='description', content='')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     script(src='//code.jquery.com/jquery-1.10.2.min.js', defer='defer')
-    script(src='js/vendor/jquery.splitter-0.14.0.js', defer='defer')
     script(src='https://www.desmos.com/api/v0.4/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6', defer='defer')
+    script(src="http://fb.me/react-0.12.0.js", defer='defer')
     script(src='js/vendor/snap.svg-min.js', defer='defer')
     script(src='js/tutorial.js', defer='defer')
     link(href='css/vendor/jquery.splitter.css', rel='stylesheet')
 body
-    #tutorial
-        #calc_container
-            #calculator(style='width: 100%; height: 100%;')
-        div
-            svg#svg(width='100%', height='100%')
+    #app
