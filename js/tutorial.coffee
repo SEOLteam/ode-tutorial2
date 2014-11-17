@@ -278,7 +278,7 @@ $(() ->
     componentDidMount: ->
       setUpSimulation(@getDOMNode())
     render: ->
-      React.createElement('svg', style: {width: '100%', height: '400px'})
+      React.createElement('svg', className: 'svg')
   )
 
   Calculator = React.createClass(
