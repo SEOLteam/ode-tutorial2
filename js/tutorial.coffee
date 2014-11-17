@@ -327,10 +327,22 @@ $(() ->
 
     render: ->
       elems = []
+      k_slider = []
+      k_slider.push(React.createElement('h5', null, 'Spring Constant'))
+      k_slider.push(React.createElement('input', type: 'range', min: '0', max: '10', value: @state.k, onChange: @handleChangeK))
+
+      m_slider = []
+      m_slider.push(React.createElement('h5', null, 'Mass'))
+      m_slider.push(React.createElement('input', type: 'range', min: '0', max: '10', step: '0.5', value: @state.m, onChange: @handleChangeM))
+
+      A_slider = []
+      A_slider.push(React.createElement('h5', null, 'Amplitude'))
+      A_slider.push(React.createElement('input', type: 'range', min: '0', max: '10', step: '0.1', value: @state.A, onChange: @handleChangeA))
+
       elems.push(
-        React.createElement('input', type: 'range', min: '0', max: '10', value: @state.k, onChange: @handleChangeK)
-        React.createElement('input', type: 'range', min: '0', max: '10', value: @state.m, onChange: @handleChangeM)
-        React.createElement('input', type: 'range', min: '0', max: '10', value: @state.A, onChange: @handleChangeA)
+        React.createElement('div', className: 'slider', k_slider)
+        React.createElement('div', className: 'slider', m_slider)
+        React.createElement('div', className: 'slider', A_slider)
       )
       if @state.page == 'calculator'
         elems.push(React.createElement(Calculator, @state))
