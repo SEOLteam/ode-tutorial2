@@ -337,7 +337,7 @@ $(() ->
 
       A_slider = []
       A_slider.push(React.createElement('h5', null, 'Amplitude'))
-      A_slider.push(React.createElement('input', type: 'range', min: '0', max: '10', step: '0.1', value: @state.A, onChange: @handleChangeA))
+      A_slider.push(React.createElement('input', type: 'range', min: '0', max: '5', step: '0.1', value: @state.A, onChange: @handleChangeA))
 
       elems.push(
         React.createElement('div', className: 'slider', k_slider)
