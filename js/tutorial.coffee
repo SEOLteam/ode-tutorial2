@@ -11,8 +11,6 @@ $(() ->
       state[key] = val
     state
 
-  model = {} # TODO use
-
   MAX_T = 4.0
 
   calculator = null
@@ -21,7 +19,7 @@ $(() ->
     calculator = Desmos.Calculator(calcNode,
       keypad: false
       graphpaper: true
-      expressions: true
+      expressions: false
       settingsMenu: false
       zoomButtons: false
       expressionsTopbar: false
@@ -297,7 +295,7 @@ $(() ->
       @desmosCalc = setUpCalculator(@getDOMNode())
 
     render: ->
-      React.createElement('div', style: {width: '100%', height: '400px'})
+      React.createElement('div', className: 'calculator')
   )
 
   SpringMass = React.createClass(
@@ -320,16 +318,24 @@ $(() ->
     componentWillUnmount: ->
       clearInterval @interval
 
+    handleChangeK: (event) ->
+      @setState(k: parseFloat(event.target.value))
+
     render: ->
+      elems = []
+      elems.push(
+        React.createElement('input', type: 'range', min: '0', max: '10', value: @state.k, onChange: @handleChangeK)
+      )
       if @state.page == 'calculator'
-        React.createElement(Calculator, @state)
+        elems.push(React.createElement(Calculator, @state))
       else if @state.page == 'simulation'
-        React.createElement(Simulation, @state)
+        elems.push(React.createElement(Simulation, @state))
       else
-        React.createElement('div', null,
-          React.createElement(Calculator, @state),
-          React.createElement(Simulation, @state)
-        )
+        elems.push(React.createElement(Simulation, @state))
+        elems.push(React.createElement(Calculator, @state))
+      React.createElement('div', null,
+        elems
+      )
   )
 
   React.render(React.createElement(SpringMass, display: location.hash, periodMs: 50), document.getElementById('app'));
