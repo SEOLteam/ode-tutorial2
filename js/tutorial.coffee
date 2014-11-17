@@ -320,11 +320,17 @@ $(() ->
 
     handleChangeK: (event) ->
       @setState(k: parseFloat(event.target.value))
+    handleChangeM: (event) ->
+      @setState(m: parseFloat(event.target.value))
+    handleChangeA: (event) ->
+      @setState(A: parseFloat(event.target.value))
 
     render: ->
       elems = []
       elems.push(
         React.createElement('input', type: 'range', min: '0', max: '10', value: @state.k, onChange: @handleChangeK)
+        React.createElement('input', type: 'range', min: '0', max: '10', value: @state.m, onChange: @handleChangeM)
+        React.createElement('input', type: 'range', min: '0', max: '10', value: @state.A, onChange: @handleChangeA)
       )
       if @state.page == 'calculator'
         elems.push(React.createElement(Calculator, @state))
