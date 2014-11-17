@@ -20,8 +20,6 @@ $(() ->
             React.createElement("input", {"type": "radio", "name": "one", "value": "e"}, " ", (one.mc.e), " "),
             React.createElement("input", {"type": "submit", "value": "Check answer"})
             )
-
-
           )
 
       React.createElement("div", null, (b))
