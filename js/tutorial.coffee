@@ -134,6 +134,7 @@ $(() ->
 
   Simulation = React.createClass(
     componentWillReceiveProps: (nextProps) ->
+      return unless @spring and @circle
       pos = nextProps['A'] * Math.cos(nextProps['t_c'] * Math.sqrt(nextProps['k'] / nextProps['m']))
       @spring.attr
         transform: 'S' + [
@@ -153,7 +154,7 @@ $(() ->
     componentDidMount: ->
       snapsvg = Snap(@getDOMNode())
       snapsvg.rect(0, 30, 5, C_RADIUS * 2 + 20)
-      Snap.load("/img/simple_spring.svg", (frag) =>
+      Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append( @spring )
         @circle = snapsvg.circle(CIRCLE_EQUILIBRIUM + C_RADIUS, C_RADIUS + Y_OFFSET, C_RADIUS)
