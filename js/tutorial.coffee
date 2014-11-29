@@ -272,7 +272,7 @@ $(() ->
       )
 
       # Ruler
-      ruler = React.createElement('img', src: 'img/ruler_long.svg', 'Ruler')
+      ruler = React.createElement('img', src: 'img/ruler_long.svg')
 
       if @state.page == 'calculator'
         elems.push(React.createElement(Calculator, @state))
