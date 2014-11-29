@@ -97,28 +97,6 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-#spliter2 .a {
-    background-color: #2d2d2d;
-}
-#spliter2 .b {
-    background-color: #2d002d;
-}
-#foo {
-    background-color: #E92727;
-}
-#calc_container {
-    background-color: #EFBD73;
-}
-#animation_container {
-    background-color: #EF3e32;
-}
-#left-pane {
-    background-color: #73A4EF;
-}
-#bar {
-    background-color: #BEE927;
-}
-
 
 /* ==========================================================================
    Helper classes
