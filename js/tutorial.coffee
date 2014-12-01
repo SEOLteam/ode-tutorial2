@@ -4,7 +4,7 @@ $(() ->
 
   getHashParams = ->
     hash = location.hash.split('?')
-    return {} unless len(hash) > 2
+    return {} unless hash.length >= 1
     state = {}
     for pair in hash[1].split("&")
       [key, val] = pair.split("=").map(decodeURIComponent)
@@ -229,6 +229,14 @@ $(() ->
       page: getPage()
       isDragging: false
 
+    getDefaultProps: ->
+      defaults =
+        showKSlider: true
+        showMSlider: true
+        showASlider: true
+        periodMs: 50
+      $.extend(defaults, getHashParams())
+
     tick: ->
       if @state.isDragging
         @setState t_c: 0
@@ -252,24 +260,30 @@ $(() ->
 
     render: ->
       elems = []
-      # Sliders
-      k_slider = []
-      k_slider.push(React.createElement('h5', null, 'Spring Constant'))
-      k_slider.push(React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK))
 
-      m_slider = []
-      m_slider.push(React.createElement('h5', null, 'Mass'))
-      m_slider.push(React.createElement('input', type: 'range', min: '1', max: '10', step: '0.5', value: @state.m, onChange: @handleChangeM))
+      unless @props.showKSlider == 'false'
+        elems.push(
+          React.createElement('div', className: 'slider', [
+            React.createElement('h5', null, 'Spring Constant'),
+            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK)
+          ])
+        )
 
-      A_slider = []
-      A_slider.push(React.createElement('h5', null, 'Amplitude'))
-      A_slider.push(React.createElement('input', type: 'range', min: '-0.8', max: '0.8', step: '0.1', value: @state.A, onChange: @handleChangeA))
+      unless @props.showMSlider == 'false'
+        elems.push(
+          React.createElement('div', className: 'slider', [
+            React.createElement('h5', null, 'Mass'),
+            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK)
+          ])
+        )
 
-      elems.push(
-        React.createElement('div', className: 'slider', k_slider)
-        React.createElement('div', className: 'slider', m_slider)
-        React.createElement('div', className: 'slider', A_slider)
-      )
+      unless @props.showASlider == 'false'
+        elems.push(
+          React.createElement('div', className: 'slider', [
+            React.createElement('h5', null, 'Amplitude'),
+            React.createElement('input', type: 'range', min: '-0.8', max: '0.8', step: '0.1', value: @state.A, onChange: @handleChangeA)
+          ])
+        )
 
       # Ruler
       ruler = React.createElement('img', src: 'img/ruler_long.svg')
@@ -287,6 +301,5 @@ $(() ->
       )
   )
 
-  React.render(React.createElement(SpringMass, display: location.hash, periodMs: 50), document.getElementById('app'));
+  React.render(React.createElement(SpringMass), document.getElementById('app'));
 )
-
