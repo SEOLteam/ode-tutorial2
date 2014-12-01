@@ -8,6 +8,9 @@ $(() ->
     state = {}
     for pair in hash[1].split("&")
       [key, val] = pair.split("=").map(decodeURIComponent)
+      try
+        val = eval(val)
+      catch evalFailed
       state[key] = val
     state
 
@@ -133,9 +136,7 @@ $(() ->
   #setUpBody()
 
   Simulation = React.createClass(
-    componentWillReceiveProps: (nextProps) ->
-      return unless @spring and @circle
-      pos = nextProps['A'] * Math.cos(nextProps['t_c'] * Math.sqrt(nextProps['k'] / nextProps['m']))
+    updatePosition: (pos) ->
       @spring.attr
         transform: 'S' + [
           (pos + 1.0) / 1.3,
@@ -144,12 +145,16 @@ $(() ->
           pos * 130 - 100,
           50
         ]
-      unless @props.isDragging
-        @circle.attr
-          transform: 'T' + [
-            CIRCLE_EQUILIBRIUM - C_RADIUS + pos * POSITION_SCALE,
-            C_RADIUS
-          ]
+      @circle.attr
+        transform: 'T' + [
+          CIRCLE_EQUILIBRIUM - C_RADIUS + pos * POSITION_SCALE,
+          C_RADIUS
+        ]
+
+    componentWillReceiveProps: (nextProps) ->
+      return unless @spring and @circle
+      pos = nextProps['A'] * Math.cos(nextProps['t_c'] * Math.sqrt(nextProps['k'] / nextProps['m']))
+      @updatePosition(pos)
 
     componentDidMount: ->
       snapsvg = Snap(@getDOMNode())
@@ -171,8 +176,8 @@ $(() ->
             dx
             0
           ]
-          Graph_A = (@node.getBoundingClientRect().left - C_RADIUS - CIRCLE_EQUILIBRIUM) / POSITION_SCALE
-          owner.setState(A: Graph_A)
+          graphA = (@node.getBoundingClientRect().left - C_RADIUS - CIRCLE_EQUILIBRIUM) / POSITION_SCALE
+          owner.setState(A: parseFloat(graphA.toFixed(2)))
 
         isBouncing = false
         currT = 0
@@ -180,7 +185,7 @@ $(() ->
 
         start = =>
           owner.setState(t_c: 0.0)
-          owner.setState(isDragging: true)
+          owner.setState(isTimeStopped: true)
           isBouncing = false
           velocity = 0
           currT = 0
@@ -189,13 +194,15 @@ $(() ->
           return
 
         stop = =>
-          owner.setState(isDragging: false)
+          owner.setState isTimeStopped: false
           isBouncing = true
           currT = 0
           return
 
         # TODO rect.drag move, start, stop
         @circle.drag move, start, stop
+
+        @updatePosition(@_owner.state.A)
       )
     render: ->
       React.createElement('svg', className: 'svg')
@@ -227,7 +234,7 @@ $(() ->
       t_c: 0  # Current time
       p: 0    # Current position
       page: getPage()
-      isDragging: false
+      isTimeStopped: true
 
     getDefaultProps: ->
       defaults =
@@ -239,11 +246,11 @@ $(() ->
       $.extend(defaults, getHashParams())
 
     tick: ->
-      if @state.isDragging
-        @setState t_c: 0
-        return
+      return if @state.isTimeStopped
       new_t_c = @state.t_c + @props.periodMs / 1000 # Milliseconds per second
-      new_t_c = 0.0 if new_t_c > 4.0
+      if new_t_c > 2 * @getPeriod()
+        new_t_c = 0.0
+        @setState isTimeStopped: true
       @setState t_c: new_t_c
 
     componentDidMount: ->
@@ -253,35 +260,49 @@ $(() ->
       clearInterval @interval
 
     handleChangeK: (event) ->
-      @setState(k: parseFloat(event.target.value))
+      @setState k: parseFloat(event.target.value)
     handleChangeM: (event) ->
-      @setState(m: parseFloat(event.target.value))
+      @setState m: parseFloat(event.target.value)
     handleChangeA: (event) ->
-      @setState(A: parseFloat(event.target.value))
+      @setState A: parseFloat(event.target.value)
+    startTime: (event) ->
+      @setState isTimeStopped: false
+
+    getPeriod: ->
+      2 * Math.PI * Math.sqrt(@state.m / @state.k)
+
+    getPosition: ->
+      @state.A * Math.cos(@state.A * Math.sqrt(@state.t_c / @state.m))
 
     render: ->
       elems = []
 
-      unless @props.showKSlider == 'false'
+      elems.push(
+        React.createElement('div', className: 'control',
+          React.createElement('button', disabled: !@state.isTimeStopped, onClick: @startTime, 'Start')
+        )
+      )
+
+      if @props.showKSlider
         elems.push(
-          React.createElement('div', className: 'slider', [
-            React.createElement('h5', null, 'Spring Constant'),
+          React.createElement('div', className: 'control', [
+            React.createElement('h5', null, "Spring K: #{@state.k}"),
             React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK)
           ])
         )
 
-      unless @props.showMSlider == 'false'
+      if @props.showMSlider
         elems.push(
-          React.createElement('div', className: 'slider', [
-            React.createElement('h5', null, 'Mass'),
-            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK)
+          React.createElement('div', className: 'control', [
+            React.createElement('h5', null, "Mass m: #{@state.m}"),
+            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
-      unless @props.showASlider == 'false'
+      if @props.showASlider
         elems.push(
-          React.createElement('div', className: 'slider', [
-            React.createElement('h5', null, 'Amplitude'),
+          React.createElement('div', className: 'control', [
+            React.createElement('h5', null, "Amplitude A: #{@state.A}"),
             React.createElement('input', type: 'range', min: '-0.8', max: '0.8', step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
         )
@@ -316,5 +337,5 @@ $(() ->
       )
   )
 
-  React.render(React.createElement(SpringMass), document.getElementById('app'));
+  React.render(React.createElement(SpringMass), document.getElementById('app'))
 )
