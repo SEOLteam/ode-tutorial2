@@ -16,4 +16,4 @@ You can control different options, for instance use
 * showGraph:      true   (The graph of time and spring position is shown by default.)
 
 ## Development
-To set up your local host, [install harp](http://harpjs.com/docs/environment/install) and [git clone](https://help.github.com/articles/which-remote-url-should-i-use/) this repo. In the terminal or command line, run `harp server` and in a browser (we primarily test with Chrome) navigate to [`http://localhost:9000/`]().
+To set up your local host, [install harp](http://harpjs.com/docs/environment/install) and [git clone](https://help.github.com/articles/which-remote-url-should-i-use/) this repo. In the terminal or command line, navigate to this repo's folder and run `harp server` and in a browser (we recommend Chrome) navigate to [`http://localhost:9000/`]().
