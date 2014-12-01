@@ -1,4 +1,4 @@
-ode-tutorial2
+ODE Simulation
 =============
 
 Customizable mass-spring simulation
