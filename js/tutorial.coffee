@@ -252,6 +252,7 @@ $(() ->
 
     render: ->
       elems = []
+      # Sliders
       k_slider = []
       k_slider.push(React.createElement('h5', null, 'Spring Constant'))
       k_slider.push(React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK))
@@ -269,12 +270,17 @@ $(() ->
         React.createElement('div', className: 'slider', m_slider)
         React.createElement('div', className: 'slider', A_slider)
       )
+
+      # Ruler
+      ruler = React.createElement('img', src: 'img/ruler_long.svg')
+
       if @state.page == 'calculator'
         elems.push(React.createElement(Calculator, @state))
       else if @state.page == 'simulation'
         elems.push(React.createElement(Simulation, @state))
       else
         elems.push(React.createElement(Simulation, @state))
+        elems.push(React.createElement('div', className: 'ruler', ruler))
         elems.push(React.createElement(Calculator, @state))
       React.createElement('div', null,
         elems
@@ -283,3 +289,4 @@ $(() ->
 
   React.render(React.createElement(SpringMass, display: location.hash, periodMs: 50), document.getElementById('app'));
 )
+
