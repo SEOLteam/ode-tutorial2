@@ -234,6 +234,7 @@ $(() ->
         showKSlider: true
         showMSlider: true
         showASlider: true
+        showStopwatch: false
         periodMs: 50
       $.extend(defaults, getHashParams())
 
@@ -285,21 +286,22 @@ $(() ->
           ])
         )
 
+      # Stopwatch
+      unless @props.showStopwatch == 'false'
+        elems.push(React.createElement('div', id: 'stopwatch',
+          React.createElement('p', className: 'time',
+            React.createElement('span', id: 'seconds', '00')
+            ':'
+            React.createElement('span', id: 'tenths', '00')
+          )
+          React.createElement('button', id: 'button-start', 'Start')
+          React.createElement('button', id: 'button-stop', 'Stop')
+          React.createElement('button', id: 'button-reset', 'Reset')
+        ))
+
       # Ruler
       ruler = React.createElement('img', src: 'img/ruler_long.svg')
 
-      # Stopwatch
-      stopwatch = []
-      stopwatch.push(React.createElement('p', className: 'time',
-        React.createElement('span', id: 'seconds', '00')
-        ':'
-        React.createElement('span', id: 'tenths', '00')
-      ))
-      stopwatch.push(React.createElement('button', id: 'button-start', 'Start'))
-      stopwatch.push(React.createElement('button', id: 'button-stop', 'Stop'))
-      stopwatch.push(React.createElement('button', id: 'button-reset', 'Reset'))
-
-      elems.push(React.createElement('div', id: 'stopwatch', stopwatch))
 
       if @state.page == 'calculator'
         elems.push(React.createElement(Calculator, @state))
