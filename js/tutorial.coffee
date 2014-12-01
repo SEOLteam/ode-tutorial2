@@ -1,7 +1,4 @@
 $(() ->
-  getPage = ->
-    location.hash.split('?')[0].substr(2)
-
   getHashParams = ->
     hash = location.hash.split('?')
     return {} unless hash.length >= 2
@@ -233,7 +230,6 @@ $(() ->
       A: 0.8    # Amplitude
       t_c: 0  # Current time
       p: 0    # Current position
-      page: getPage()
       isTimeStopped: true
 
     getDefaultProps: ->
@@ -242,6 +238,8 @@ $(() ->
         showMSlider: true
         showASlider: true
         showStopwatch: false
+        showAnimation: true
+        showGraph: true
         periodMs: 50
       $.extend(defaults, getHashParams())
 
@@ -308,7 +306,7 @@ $(() ->
         )
 
       # Stopwatch
-      unless @props.showStopwatch == 'false'
+      if @props.showStopwatch
         elems.push(React.createElement('div', id: 'stopwatch',
           React.createElement('p', className: 'time',
             React.createElement('span', id: 'seconds', '00')
@@ -320,18 +318,14 @@ $(() ->
           React.createElement('button', id: 'button-reset', 'Reset')
         ))
 
-      # Ruler
-      ruler = React.createElement('img', src: 'img/ruler_long.svg')
+      if @props.showGraph
+        elems.push(
+          React.createElement(Calculator, @state),
+        )
+      if @props.showAnimation
+        ruler = React.createElement('img', src: 'img/ruler_long.svg')
+        elems.push(React.createElement(Simulation, @state), React.createElement('div', className: 'ruler', ruler))
 
-
-      if @state.page == 'calculator'
-        elems.push(React.createElement(Calculator, @state))
-      else if @state.page == 'simulation'
-        elems.push(React.createElement(Simulation, @state))
-      else
-        elems.push(React.createElement(Simulation, @state))
-        elems.push(React.createElement('div', className: 'ruler', ruler))
-        elems.push(React.createElement(Calculator, @state))
       React.createElement('div', null,
         elems
       )
