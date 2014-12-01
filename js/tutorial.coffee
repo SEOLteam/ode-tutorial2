@@ -4,7 +4,7 @@ $(() ->
 
   getHashParams = ->
     hash = location.hash.split('?')
-    return {} unless hash.length >= 1
+    return {} unless hash.length >= 2
     state = {}
     for pair in hash[1].split("&")
       [key, val] = pair.split("=").map(decodeURIComponent)
