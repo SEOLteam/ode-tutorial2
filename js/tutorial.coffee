@@ -318,13 +318,14 @@ $(() ->
           React.createElement('button', id: 'button-reset', 'Reset')
         ))
 
+      if @props.showAnimation
+        ruler = React.createElement('img', src: 'img/ruler_long.svg')
+        elems.push(React.createElement(Simulation, @state), React.createElement('div', className: 'ruler', ruler))
+
       if @props.showGraph
         elems.push(
           React.createElement(Calculator, @state),
         )
-      if @props.showAnimation
-        ruler = React.createElement('img', src: 'img/ruler_long.svg')
-        elems.push(React.createElement(Simulation, @state), React.createElement('div', className: 'ruler', ruler))
 
       React.createElement('div', null,
         elems
