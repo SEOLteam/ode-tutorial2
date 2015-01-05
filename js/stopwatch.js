@@ -1,12 +1,13 @@
 /**
  * Created by Haichuan on 11/30/2014.
  */
-window.onload = function () {
+function activateStopwatch() {
+    "use strict";
 
-    var seconds = 00;
-    var tenths = 00;
-    var appendTens = document.getElementById("tenths")
-    var appendSeconds = document.getElementById("seconds")
+    var seconds = 0;
+    var tenths = 0;
+    var appendTens = document.getElementById("tenths");
+    var appendSeconds = document.getElementById("seconds");
     var buttonStart = document.getElementById('button-start');
     var buttonStop = document.getElementById('button-stop');
     var buttonReset = document.getElementById('button-reset');
@@ -16,11 +17,11 @@ window.onload = function () {
 
         clearInterval(Interval);
         Interval = setInterval(startTimer, 10);
-    }
+    };
 
     buttonStop.onclick = function() {
         clearInterval(Interval);
-    }
+    };
 
 
     buttonReset.onclick = function() {
@@ -29,7 +30,7 @@ window.onload = function () {
         seconds = "00";
         appendTens.innerHTML = tenths;
         appendSeconds.innerHTML = seconds;
-    }
+    };
 
 
 

@@ -225,6 +225,7 @@ $(() ->
       @setState t_c: new_t_c
 
     componentDidMount: ->
+      activateStopwatch();
       @interval = setInterval(@tick, @props.periodMs)
 
     componentWillUnmount: ->
