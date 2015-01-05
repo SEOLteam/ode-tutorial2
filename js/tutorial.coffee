@@ -103,32 +103,38 @@ $(() ->
   Simulation = React.createClass(
     SPRING_MASS_Y: 90
 
-    updatePosition: (pos) ->
+    updatePosition: (props) ->
+      pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
       @spring.attr
         transform: 'S' + [
-          (pos + 1.0) / 1.3,
+          Math.abs(pos),
+          1.0
+        ]
+      springWidth = Math.abs(@spring.node.getBoundingClientRect().left - @spring.node.getBoundingClientRect().right)
+      @spring.attr
+        transform: 'S' + [
+          pos,
           1.0
         ] + 'T' + [
-          pos * 130 - 100,
-          @SPRING_MASS_Y
+          CIRCLE_EQUILIBRIUM + Math.sign(pos) * springWidth / 2.0,#pos * CIRCLE_EQUILIBRIUM,
+          @SPRING_MASS_Y - Math.abs(@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2.0
         ]
       @circle.attr
         transform: 'S' + [
-          @props.m,
-          @props.m
+          props.m,
+          props.m
         ] + 'T' + [
-          CIRCLE_EQUILIBRIUM - C_RADIUS * @props.m + pos * POSITION_SCALE,
+          CIRCLE_EQUILIBRIUM + 4 * C_RADIUS + Math.sign(pos) * springWidth,
           @SPRING_MASS_Y
         ]
 
     componentWillReceiveProps: (nextProps) ->
       return unless @spring and @circle
-      pos = nextProps['A'] * Math.cos(nextProps['t_c'] * Math.sqrt(nextProps['k'] / nextProps['m']))
-      @updatePosition(pos)
+      @updatePosition(nextProps)
 
     componentDidMount: ->
       snapsvg = Snap(@getDOMNode())
-      snapsvg.rect(0, 30, 5, C_RADIUS * @props.m * 2 + 20)
+      snapsvg.rect(390, 40, 4, 200)
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append( @spring )
@@ -139,21 +145,17 @@ $(() ->
           strokeWidth: 2
         });
         pos = 0
-        Graph_A = null
+        prevA = null
         owner = @_owner
         move = (dx) ->
-          @attr transform: @data('origTransform') + 't' + [
-            dx
-            0
-          ]
-          graphA = (@node.getBoundingClientRect().left + @node.getBoundingClientRect().right) / 2.0 / POSITION_SCALE
-          owner.setState(A: parseFloat(graphA.toFixed(2)))
+          owner.setState(A: parseFloat((prevA + dx / POSITION_SCALE).toFixed(2)))
 
         isBouncing = false
         currT = 0
         velocity = 0
 
         start = =>
+          prevA = owner.state.A
           owner.setState(t_c: 0.0)
           owner.setState(isTimeStopped: true)
           isBouncing = false
@@ -172,7 +174,7 @@ $(() ->
         # TODO rect.drag move, start, stop
         @circle.drag move, start, stop
 
-        @updatePosition(@_owner.state.A)
+        @updatePosition(@_owner.state)
       )
     render: ->
       React.createElement('svg', className: 'svg')
@@ -200,7 +202,7 @@ $(() ->
     getInitialState: ->
       k: 50   # Spring constant
       m: 4   # Mass
-      A: 0.8    # Amplitude
+      A: 0.5    # Amplitude
       t_c: 0  # Current time
       p: 0    # Current position
       isTimeStopped: true
@@ -225,7 +227,7 @@ $(() ->
       @setState t_c: new_t_c
 
     componentDidMount: ->
-      activateStopwatch();
+      activateStopwatch() if @props.showStopwatch
       @interval = setInterval(@tick, @props.periodMs)
 
     componentWillUnmount: ->
@@ -267,7 +269,7 @@ $(() ->
         elems.push(
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Mass m: #{@state.m}"),
-            React.createElement('input', type: 'range', min: '1', max: '10', step: '1.0', value: @state.m, onChange: @handleChangeM)
+            React.createElement('input', type: 'range', min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
