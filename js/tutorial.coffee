@@ -102,6 +102,7 @@ $(() ->
 
   Simulation = React.createClass(
     SPRING_MASS_Y: 90
+    MAX_SPRING_WIDTH: 10
 
     updatePosition: (props) ->
       pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
@@ -119,6 +120,7 @@ $(() ->
           CIRCLE_EQUILIBRIUM + Math.sign(pos) * springWidth / 2.0,#pos * CIRCLE_EQUILIBRIUM,
           @SPRING_MASS_Y - Math.abs(@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2.0
         ]
+      $(@spring.node).find('path').attr('stroke-width', props.k / 10 + 1)
       @circle.attr
         transform: 'S' + [
           props.m,
@@ -261,7 +263,7 @@ $(() ->
         elems.push(
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Spring K: #{@state.k}"),
-            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK)
+            React.createElement('input', type: 'range', min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
           ])
         )
 
