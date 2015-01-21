@@ -14,7 +14,7 @@ $(() ->
   MAX_T = 4.0
   POSITION_SCALE = 300
   CIRCLE_EQUILIBRIUM = 160
-  C_RADIUS = 50
+  C_RADIUS = 8
   Y_OFFSET = -35
   calculator = null
   setUpCalculator = (calcNode) ->
@@ -99,88 +99,65 @@ $(() ->
     calculator # TODO NOOO!!
 
   snapsvg = null
-  #    spring = null
-  #    Snap.load("/img/simple_spring.svg", (frag) =>
-  #      spring = frag.select("g")
-  #      snapsvg.append( spring )
-  #      snapsvg.group(circle, spring)
-  #    )
-  #    INTERVAL_MS = 60
-  #    MILLI_PER_SEC = 1000
-  #    setInterval(() ->
-  #      return unless isBouncing
-  #      currT = 0 if currT > MAX_T
-  #      model.calculator.setExpression
-  #        id: 't_c'
-  #        latex: 't_c=' + currT.toFixed(2)
-  #      K = parseFloat(calculator.getState().expressions.list[2].latex.substr(2))
-  #      dx = CIRCLE_EQUILIBRIUM - circle.getBBox().x
-  #      a = if Math.abs(dx) > 3.0 then K * dx else 0.0
-  #      velocity += a
-  #      p_c = 10 * getVal('A') * Math.cos(currT * Math.sqrt(getVal('k') / getVal('m')))
-  #      circle.attr
-  #        transform: 'T' + [
-  #          CIRCLE_EQUILIBRIUM + C_RADIUS + p_c * 300,
-  #          C_RADIUS
-  #        ]
-  #      spring.node.attr
-  #        transform: spring.node.transform().local + 's' + (circle.getBBox().x / 2.0)
-  #      pos = (circle.node.getBoundingClientRect().left - 700) / 200
-  #      model.calculator.setExpression
-  #        id: 'A'
-  #        latex: 'A=' + pos / 2.0
-
-  #setUpBody()
 
   Simulation = React.createClass(
-    updatePosition: (pos) ->
+    SPRING_MASS_Y: 90
+    MAX_SPRING_WIDTH: 10
+
+    updatePosition: (props) ->
+      pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
       @spring.attr
         transform: 'S' + [
-          (pos + 1.0) / 1.3,
+          Math.abs(pos),
+          1.0
+        ]
+      springWidth = Math.abs(@spring.node.getBoundingClientRect().left - @spring.node.getBoundingClientRect().right)
+      @spring.attr
+        transform: 'S' + [
+          pos,
           1.0
         ] + 'T' + [
-          pos * 130 - 100,
-          50
+          CIRCLE_EQUILIBRIUM + Math.sign(pos) * springWidth / 2.0,#pos * CIRCLE_EQUILIBRIUM,
+          @SPRING_MASS_Y - Math.abs(@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2.0
         ]
+      $(@spring.node).find('path').attr('stroke-width', props.k / 10 + 1)
       @circle.attr
-        transform: 'T' + [
-          CIRCLE_EQUILIBRIUM - C_RADIUS + pos * POSITION_SCALE,
-          C_RADIUS
+        transform: 'S' + [
+          props.m,
+          props.m
+        ] + 'T' + [
+          CIRCLE_EQUILIBRIUM + 4 * C_RADIUS + Math.sign(pos) * springWidth,
+          @SPRING_MASS_Y
         ]
 
     componentWillReceiveProps: (nextProps) ->
       return unless @spring and @circle
-      pos = nextProps['A'] * Math.cos(nextProps['t_c'] * Math.sqrt(nextProps['k'] / nextProps['m']))
-      @updatePosition(pos)
+      @updatePosition(nextProps)
 
     componentDidMount: ->
       snapsvg = Snap(@getDOMNode())
-      snapsvg.rect(0, 30, 5, C_RADIUS * 2 + 20)
+      snapsvg.rect(390, 40, 4, 200)
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append( @spring )
-        @circle = snapsvg.circle(CIRCLE_EQUILIBRIUM + C_RADIUS, C_RADIUS + Y_OFFSET, C_RADIUS)
+        @circle = snapsvg.circle(CIRCLE_EQUILIBRIUM + C_RADIUS * @props.m, C_RADIUS * @props.m + Y_OFFSET, C_RADIUS)
         @circle.attr({
           fill: "#bada00",
           stroke: "#000",
           strokeWidth: 2
         });
         pos = 0
-        Graph_A = null
+        prevA = null
         owner = @_owner
         move = (dx) ->
-          @attr transform: @data('origTransform') + 't' + [
-            dx
-            0
-          ]
-          graphA = (@node.getBoundingClientRect().left - C_RADIUS - CIRCLE_EQUILIBRIUM) / POSITION_SCALE
-          owner.setState(A: parseFloat(graphA.toFixed(2)))
+          owner.setState(A: parseFloat((prevA + dx / POSITION_SCALE).toFixed(2)))
 
         isBouncing = false
         currT = 0
         velocity = 0
 
         start = =>
+          prevA = owner.state.A
           owner.setState(t_c: 0.0)
           owner.setState(isTimeStopped: true)
           isBouncing = false
@@ -199,7 +176,7 @@ $(() ->
         # TODO rect.drag move, start, stop
         @circle.drag move, start, stop
 
-        @updatePosition(@_owner.state.A)
+        @updatePosition(@_owner.state)
       )
     render: ->
       React.createElement('svg', className: 'svg')
@@ -227,7 +204,7 @@ $(() ->
     getInitialState: ->
       k: 50   # Spring constant
       m: 4   # Mass
-      A: 0.8    # Amplitude
+      A: 0.5    # Amplitude
       t_c: 0  # Current time
       p: 0    # Current position
       isTimeStopped: true
@@ -252,6 +229,7 @@ $(() ->
       @setState t_c: new_t_c
 
     componentDidMount: ->
+      activateStopwatch() if @props.showStopwatch
       @interval = setInterval(@tick, @props.periodMs)
 
     componentWillUnmount: ->
@@ -285,7 +263,7 @@ $(() ->
         elems.push(
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Spring K: #{@state.k}"),
-            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.k, onChange: @handleChangeK)
+            React.createElement('input', type: 'range', min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
           ])
         )
 
@@ -293,7 +271,7 @@ $(() ->
         elems.push(
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Mass m: #{@state.m}"),
-            React.createElement('input', type: 'range', min: '1', max: '100', step: '10.0', value: @state.m, onChange: @handleChangeM)
+            React.createElement('input', type: 'range', min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
@@ -301,7 +279,7 @@ $(() ->
         elems.push(
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Amplitude A: #{@state.A}"),
-            React.createElement('input', type: 'range', min: '-0.8', max: '0.8', step: '0.1', value: @state.A, onChange: @handleChangeA)
+            React.createElement('input', type: 'range', min: '-0.5', max: '0.5', step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
         )
 
@@ -326,6 +304,10 @@ $(() ->
         elems.push(
           React.createElement(Calculator, @state),
         )
+
+      elems.push(
+        React.createElement('div', null, "Position: #{}")
+      )
 
       React.createElement('div', null,
         elems
