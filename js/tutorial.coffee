@@ -103,22 +103,23 @@ $(() ->
   Simulation = React.createClass(
     SPRING_MASS_Y: 90
     MAX_SPRING_WIDTH: 10
+    HEIGHT: 200
 
     updatePosition: (props) ->
       pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
       @spring.attr
         transform: 'S' + [
           Math.abs(pos),
-          1.0
+          1
         ]
       springWidth = Math.abs(@spring.node.getBoundingClientRect().left - @spring.node.getBoundingClientRect().right)
       @spring.attr
         transform: 'S' + [
           pos,
-          1.0
+          1
         ] + 'T' + [
-          CIRCLE_EQUILIBRIUM + Math.sign(pos) * springWidth / 2.0,#pos * CIRCLE_EQUILIBRIUM,
-          @SPRING_MASS_Y - Math.abs(@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2.0
+          CIRCLE_EQUILIBRIUM + Math.sign(pos) * springWidth / 2,#pos * CIRCLE_EQUILIBRIUM,
+          @SPRING_MASS_Y - Math.abs(@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2
         ]
       $(@spring.node).find('path').attr('stroke-width', props.k / 10 + 1)
       @circle.attr
@@ -135,8 +136,9 @@ $(() ->
       @updatePosition(nextProps)
 
     componentDidMount: ->
+      @width = @getDOMNode().offsetWidth
       snapsvg = Snap(@getDOMNode())
-      snapsvg.rect(390, 40, 4, 200)
+      snapsvg.rect(0, 0, 4, @HEIGHT)
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append( @spring )
@@ -262,7 +264,7 @@ $(() ->
       if @props.showKSlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Spring K: #{@state.k}"),
+            React.createElement('h5', null, "Spring K: #{@state.k} N/m"),
             React.createElement('input', type: 'range', min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
           ])
         )
@@ -270,7 +272,7 @@ $(() ->
       if @props.showMSlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Mass m: #{@state.m}"),
+            React.createElement('h5', null, "Mass m: #{@state.m} kg"),
             React.createElement('input', type: 'range', min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
@@ -278,7 +280,7 @@ $(() ->
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Amplitude A: #{@state.A}"),
+            React.createElement('h5', null, "Amplitude A: #{@state.A} m"),
             React.createElement('input', type: 'range', min: '-0.5', max: '0.5', step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
         )
