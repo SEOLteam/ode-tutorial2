@@ -11,9 +11,10 @@ $(() ->
       state[key] = val
     state
 
+
+  MAX_A = 0.5
   MAX_T = 4.0
   POSITION_SCALE = 300
-  CIRCLE_EQUILIBRIUM = 160
   C_RADIUS = 8
   Y_OFFSET = -35
   calculator = null
@@ -87,7 +88,6 @@ $(() ->
             domain:
               min: 0
               max: 1
-
             hidden: false
             color: "#8064A2"
             style: "point"
@@ -101,33 +101,26 @@ $(() ->
   snapsvg = null
 
   Simulation = React.createClass(
-    SPRING_MASS_Y: 90
+    SPRING_MASS_Y: 70
     MAX_SPRING_WIDTH: 10
+    HEIGHT: 180
 
     updatePosition: (props) ->
       pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
+      sx = @width * (1 / 2 + pos / MAX_A / 4) / @springWidth
+      sy = 1
+      cy = @SPRING_MASS_Y - (@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2
+      cx = 0
       @spring.attr
-        transform: 'S' + [
-          Math.abs(pos),
-          1.0
-        ]
-      springWidth = Math.abs(@spring.node.getBoundingClientRect().left - @spring.node.getBoundingClientRect().right)
-      @spring.attr
-        transform: 'S' + [
-          pos,
-          1.0
-        ] + 'T' + [
-          CIRCLE_EQUILIBRIUM + Math.sign(pos) * springWidth / 2.0,#pos * CIRCLE_EQUILIBRIUM,
-          @SPRING_MASS_Y - Math.abs(@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2.0
-        ]
+        transform: 'matrix(' + [sx, 0, 0, sy, cx - sx * cx, 2 * cy - sy * cy] + ')'
       $(@spring.node).find('path').attr('stroke-width', props.k / 10 + 1)
       @circle.attr
         transform: 'S' + [
           props.m,
           props.m
         ] + 'T' + [
-          CIRCLE_EQUILIBRIUM + 4 * C_RADIUS + Math.sign(pos) * springWidth,
-          @SPRING_MASS_Y
+          @width * (1 / 2 + pos / MAX_A / 4),
+          @SPRING_MASS_Y + C_RADIUS + 12
         ]
 
     componentWillReceiveProps: (nextProps) ->
@@ -135,15 +128,17 @@ $(() ->
       @updatePosition(nextProps)
 
     componentDidMount: ->
+      @width = @getDOMNode().offsetWidth
       snapsvg = Snap(@getDOMNode())
-      snapsvg.rect(390, 40, 4, 200)
+      snapsvg.rect(0, 0, 4, @HEIGHT)
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
-        snapsvg.append( @spring )
-        @circle = snapsvg.circle(CIRCLE_EQUILIBRIUM + C_RADIUS * @props.m, C_RADIUS * @props.m + Y_OFFSET, C_RADIUS)
+        snapsvg.append(@spring)
+        @springWidth = @spring.node.getBoundingClientRect().right - @spring.node.getBoundingClientRect().left
+        @circle = snapsvg.circle(0, 0, C_RADIUS)
         @circle.attr({
-          fill: "#bada00",
-          stroke: "#000",
+          fill: "#797293",
+          stroke: "#CCC3E2",
           strokeWidth: 2
         });
         pos = 0
@@ -223,9 +218,6 @@ $(() ->
     tick: ->
       return if @state.isTimeStopped
       new_t_c = @state.t_c + @props.periodMs / 1000 # Milliseconds per second
-      if new_t_c > 2 * @getPeriod()
-        new_t_c = 0.0
-        @setState isTimeStopped: true
       @setState t_c: new_t_c
 
     componentDidMount: ->
@@ -241,8 +233,11 @@ $(() ->
       @setState m: parseFloat(event.target.value)
     handleChangeA: (event) ->
       @setState A: parseFloat(event.target.value)
-    startTime: (event) ->
-      @setState isTimeStopped: false
+    timeButton: (event) ->
+      if @state.isTimeStopped
+        @setState isTimeStopped: false
+      else
+        @setState isTimeStopped: true, t_c: 0
 
     getPeriod: ->
       2 * Math.PI * Math.sqrt(@state.m / @state.k)
@@ -255,31 +250,34 @@ $(() ->
 
       elems.push(
         React.createElement('div', className: 'control',
-          React.createElement('button', disabled: !@state.isTimeStopped, onClick: @startTime, 'Start')
+          React.createElement('button', className: 'start-reset-button', onClick: @timeButton, if @state.isTimeStopped then 'START' else 'RESET')
         )
       )
 
       if @props.showKSlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Spring K: #{@state.k}"),
-            React.createElement('input', type: 'range', min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
+            React.createElement('h5', null, "Spring K: #{@state.k} N/m"),
+            React.createElement('input',
+              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
           ])
         )
 
       if @props.showMSlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Mass m: #{@state.m}"),
-            React.createElement('input', type: 'range', min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
+            React.createElement('h5', null, "Mass m: #{@state.m} kg"),
+            React.createElement('input',
+              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Amplitude A: #{@state.A}"),
-            React.createElement('input', type: 'range', min: '-0.5', max: '0.5', step: '0.1', value: @state.A, onChange: @handleChangeA)
+            React.createElement('h5', null, "Amplitude A: #{@state.A} m"),
+            React.createElement('input',
+              type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
         )
 
