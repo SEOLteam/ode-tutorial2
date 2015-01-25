@@ -218,9 +218,6 @@ $(() ->
     tick: ->
       return if @state.isTimeStopped
       new_t_c = @state.t_c + @props.periodMs / 1000 # Milliseconds per second
-      if new_t_c > 2 * @getPeriod()
-        new_t_c = 0.0
-        @setState isTimeStopped: true
       @setState t_c: new_t_c
 
     componentDidMount: ->
@@ -236,8 +233,11 @@ $(() ->
       @setState m: parseFloat(event.target.value)
     handleChangeA: (event) ->
       @setState A: parseFloat(event.target.value)
-    startTime: (event) ->
-      @setState isTimeStopped: false
+    timeButton: (event) ->
+      if @state.isTimeStopped
+        @setState isTimeStopped: false
+      else
+        @setState isTimeStopped: true, t_c: 0
 
     getPeriod: ->
       2 * Math.PI * Math.sqrt(@state.m / @state.k)
@@ -250,7 +250,7 @@ $(() ->
 
       elems.push(
         React.createElement('div', className: 'control',
-          React.createElement('button', disabled: !@state.isTimeStopped, onClick: @startTime, 'Start')
+          React.createElement('button', className: 'start-reset-button', onClick: @timeButton, if @state.isTimeStopped then 'START' else 'RESET')
         )
       )
 
@@ -259,7 +259,7 @@ $(() ->
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Spring K: #{@state.k} N/m"),
             React.createElement('input',
-              type: 'range', min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
+              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
           ])
         )
 
@@ -268,7 +268,7 @@ $(() ->
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Mass m: #{@state.m} kg"),
             React.createElement('input',
-              type: 'range', min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
+              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
@@ -277,7 +277,7 @@ $(() ->
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Amplitude A: #{@state.A} m"),
             React.createElement('input',
-              type: 'range', min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
+              type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
         )
 
