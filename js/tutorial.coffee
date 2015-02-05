@@ -291,8 +291,19 @@ $(() ->
           )
           React.createElement('button', id: 'button-start', 'Start')
           React.createElement('button', id: 'button-stop', 'Stop')
+          React.createElement('button', id: 'button-lap', 'Lap')
           React.createElement('button', id: 'button-reset', 'Reset')
         ))
+
+        elems.push(React.createElement('div', id: 'timelog',
+          React.createElement('p', className: 'time',
+            React.createElement('span', className: 'log current', id: 'log-1', '1. 00:00')
+            React.createElement('span', className: 'log', id: 'log-2', '2. 00:00')
+            React.createElement('span', className: 'log', id: 'log-3', '3. 00:00')
+            React.createElement('span', className: 'log', id: 'log-4', '4. 00:00')
+            React.createElement('span', className: 'log', id: 'log-5', '5. 00:00')
+          )
+          ))
 
       if @props.showAnimation
         ruler = React.createElement('img', src: 'img/ruler_long.svg')
