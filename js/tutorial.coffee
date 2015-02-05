@@ -116,8 +116,8 @@ $(() ->
       $(@spring.node).find('path').attr('stroke-width', props.k / 10 + 1)
       @circle.attr
         transform: 'S' + [
-          props.m,
-          props.m
+          Math.pow(50*props.m, 1/3),
+          Math.pow(50*props.m, 1/3)
         ] + 'T' + [
           @width * (1 / 2 + pos / MAX_A / 4),
           @SPRING_MASS_Y + C_RADIUS + 12
@@ -266,18 +266,18 @@ $(() ->
       if @props.showMSlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Mass m: #{@state.m} kg"),
+            React.createElement('h5', null, "Mass m: #{parseFloat(@state.m).toFixed(2)} kg"),
             React.createElement('input',
-              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
+              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '10', step: '0.25', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Amplitude A: #{@state.A} m"),
+            React.createElement('h5', null, "Amplitude A: #{parseFloat((@state.A + 0.5) * 5 + 1).toFixed(2)} cm"),
             React.createElement('input',
-              type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
+              type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.05', value: @state.A, onChange: @handleChangeA)
           ])
         )
 
