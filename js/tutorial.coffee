@@ -275,7 +275,7 @@ $(() ->
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Amplitude A: #{parseFloat((@state.A) * 10 + 1).toFixed(2)} cm"),
+            React.createElement('h5', null, "Amplitude A: #{parseFloat((@state.A) * 6 + 1).toFixed(2)} cm"),
             React.createElement('input',
               type: 'range', disabled: !@state.isTimeStopped, min: 0, max: MAX_A, step: '0.02', value: @state.A, onChange: @handleChangeA)
           ])
