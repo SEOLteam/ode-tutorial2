@@ -1,4 +1,7 @@
 /**
+ * Created by haichuanyu on 2/5/15.
+ */
+/**
  * Created by Haichuan on 11/30/2014.
  */
 function activateStopwatch() {
@@ -23,9 +26,10 @@ function activateStopwatch() {
 
 
     buttonStart.onclick = function() {
+        var startTime = window.performance.now();
 
         clearInterval(Interval);
-        Interval = setInterval(startTimer, 10);
+        Interval = setInterval(startTimer(startTime), 100);
     };
 
     buttonStop.onclick = function() {
@@ -94,38 +98,30 @@ function activateStopwatch() {
     };
 
 
+    // Tock function
+    function startTimer (startTime) {
+        var elapsed = window.performance.now() - startTime;
+        tenths = parseInt((elapsed * 1000) % 100);
+        seconds = parseInt(elapsed);
 
-    function startTimer () {
-        tenths++;
+        debugger
 
-        if(tenths < 9){
+        if (tenths < 9) {
             appendTens.innerHTML = "0" + tenths;
         }
 
-        if (tenths > 9){
+        if (tenths > 9) {
             appendTens.innerHTML = tenths;
 
         }
 
-        if (tenths > 99) {
-            console.log("seconds");
-            seconds++;
+        if (seconds < 9) {
             appendSeconds.innerHTML = "0" + seconds;
-            tenths = 0;
-            appendTens.innerHTML = "0" + 0;
         }
 
-        if (seconds > 9){
+        if (seconds > 9) {
             appendSeconds.innerHTML = seconds;
         }
-
-    }
-
-    function writeLap () {
-
-    }
-
-    function clearLaps () {
 
     }
 
