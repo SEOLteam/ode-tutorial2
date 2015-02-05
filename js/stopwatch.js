@@ -33,33 +33,57 @@ function activateStopwatch() {
     };
 
     buttonLap.onclick = function() {
-        var i = lap % 5;
-        if(tenths < 9){
-            if (seconds < 9){ appendLog[i].innerHTML = (lap+1) + '. ' + "0" + seconds + ':' + "0" + tenths; }
-            if (seconds > 9){ appendLog[i].innerHTML = (lap+1) + '. ' + seconds + ':' + "0" + tenths; }
+        if(lap < 5) {
+            if (tenths < 9) {
+                if (seconds < 9) { appendLog[lap].innerHTML = (lap + 1) + '. ' + "0" + seconds + ':' + "0" + tenths; }
+                if (seconds > 9) { appendLog[lap].innerHTML = (lap + 1) + '. ' + seconds + ':' + "0" + tenths; }
+            }
+
+            if (tenths > 9) {
+                if (seconds < 9) { appendLog[lap].innerHTML = (lap + 1) + '. ' + "0" + seconds + ':' + tenths; }
+                if (seconds > 9) { appendLog[lap].innerHTML = (lap + 1) + '. ' + seconds + ':' + tenths; }
+            }
+
+            // Remove current class from all
+            appendLog.forEach(function(element) {
+                element.className = 'log'
+            });
+            // Apply current class
+            appendLog[lap].className = appendLog[lap].className + ' ' + 'current';
+        }
+        else {
+            var prev, curr;
+            appendLog.reverse();
+
+            appendLog.forEach(function(element){
+                curr = element.innerHTML;
+                element.innerHTML = prev;
+                prev = curr;
+            });
+
+            if (tenths < 9) {
+                if (seconds < 9) { appendLog[0].innerHTML = (lap + 1) + '. ' + "0" + seconds + ':' + "0" + tenths; }
+                if (seconds > 9) { appendLog[0].innerHTML = (lap + 1) + '. ' + seconds + ':' + "0" + tenths; }
+            }
+
+            if (tenths > 9) {
+                if (seconds < 9) { appendLog[0].innerHTML = (lap + 1) + '. ' + "0" + seconds + ':' + tenths; }
+                if (seconds > 9) { appendLog[0].innerHTML = (lap + 1) + '. ' + seconds + ':' + tenths; }
+            }
+
+            appendLog.reverse();
         }
 
-        if (tenths > 9){
-            if (seconds < 9){ appendLog[i].innerHTML = (lap+1) + '. ' + "0" + seconds + ':' + tenths; }
-            if (seconds > 9){ appendLog[i].innerHTML = (lap+1) + '. ' + seconds + ':'  + tenths; }
-        }
-
-        // Remove current class from all
-        appendLog.forEach(function(element) {
-            element.className = 'log'
-        });
-        // Apply current class
-        appendLog[i].className = appendLog[i].className + ' ' + 'current';
 
         lap++;
     };
 
     buttonReset.onclick = function() {
         clearInterval(Interval);
-        tenths = "00";
-        seconds = "00";
-        appendTens.innerHTML = tenths;
-        appendSeconds.innerHTML = seconds;
+        tenths = 0;
+        seconds = 0;
+        appendTens.innerHTML = "00";
+        appendSeconds.innerHTML = "00";
 
         lap = 0;
         var i = 1;
