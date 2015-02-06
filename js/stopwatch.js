@@ -49,11 +49,11 @@ function activateStopwatch() {
                 if (seconds > 9) { appendLog[lap].innerHTML = (lap + 1) + '. ' + seconds + ':' + tenths; }
             }
 
-            // Remove current class from all
+            // Remove current class from all log entries
             appendLog.forEach(function(element) {
                 element.className = 'log'
             });
-            // Apply current class
+            // Apply current class to current entry
             appendLog[lap].className = appendLog[lap].className + ' ' + 'current';
         }
         else {
@@ -79,7 +79,6 @@ function activateStopwatch() {
             appendLog.reverse();
         }
 
-
         lap++;
     };
 
@@ -93,38 +92,16 @@ function activateStopwatch() {
         lap = 0;
         var i = 1;
         appendLog.forEach(function(element) {
+            element.className = 'log';
             element.innerHTML = i + '. 00:00';
             i++;
-        })
+        });
+
+        // Apply current class
+        appendLog[0].className = appendLog[lap].className + ' ' + 'current';
     };
 
 
-    // Tock function
-    //function startTimer () {
-    //    tenths++;
-    //
-    //    if (tenths < 9) {
-    //        appendTens.innerHTML = "0" + tenths;
-    //    }
-    //
-    //    if (tenths > 9) {
-    //        appendTens.innerHTML = tenths;
-    //    }
-    //
-    //    if (tenths > 99) {
-    //        console.log("seconds");
-    //        seconds++;
-    //        appendSeconds.innerHTML = "0" + seconds;
-    //        tenths = 0;
-    //        appendTens.innerHTML = "0" + 0;
-    //    }
-    //
-    //    if (seconds > 9) {
-    //        appendSeconds.innerHTML = seconds;
-    //    }
-    //
-    //
-    //}
     function startTimer () {
         var elapsed = window.performance.now() - startTime;
         tenths = parseInt((elapsed % 1000)/10);
