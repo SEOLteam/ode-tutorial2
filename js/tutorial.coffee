@@ -238,6 +238,11 @@ $(() ->
         @setState isTimeStopped: false
       else
         @setState isTimeStopped: true, t_c: 0
+    startTime: (event) ->
+
+      @setState isTimeStopped: false
+    stopTime: (event) ->
+      @setState isTimeStopped: true, t_c: 0
 
     getPeriod: ->
       2 * Math.PI * Math.sqrt(@state.m / @state.k)
@@ -247,12 +252,6 @@ $(() ->
 
     render: ->
       elems = []
-
-      elems.push(
-        React.createElement('div', className: 'control',
-          React.createElement('button', className: 'start-reset-button', onClick: @timeButton, if @state.isTimeStopped then 'START' else 'RESET')
-        )
-      )
 
       if @props.showKSlider
         elems.push(
@@ -289,10 +288,27 @@ $(() ->
             ':'
             React.createElement('span', id: 'tenths', '00')
           )
-          React.createElement('button', id: 'button-start', 'Start')
-          React.createElement('button', id: 'button-stop', 'Stop')
-          React.createElement('button', id: 'button-reset', 'Reset')
+          React.createElement('button', id: 'button-start', onClick: @startTime, 'Start')
+          React.createElement('button', id: 'button-stop', onClick: @stopTime, 'Stop')
+          React.createElement('button', id: 'button-lap', 'Lap')
+          React.createElement('button', id: 'button-reset', onClick: @stopTime, 'Reset')
         ))
+
+        elems.push(React.createElement('div', id: 'timelog',
+          React.createElement('p', className: 'time',
+            React.createElement('span', className: 'log current', id: 'log-1', '1. 00:00')
+            React.createElement('span', className: 'log', id: 'log-2', '2. 00:00')
+            React.createElement('span', className: 'log', id: 'log-3', '3. 00:00')
+            React.createElement('span', className: 'log', id: 'log-4', '4. 00:00')
+            React.createElement('span', className: 'log', id: 'log-5', '5. 00:00')
+          )
+          ))
+      else
+        elems.push(
+          React.createElement('div', className: 'control',
+            React.createElement('button', className: 'start-reset-button', onClick: @timeButton, if @state.isTimeStopped then 'Start' else 'Reset')
+          )
+        )
 
       if @props.showAnimation
         ruler = React.createElement('img', src: 'img/ruler_long.svg')
