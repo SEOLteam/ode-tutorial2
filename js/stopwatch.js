@@ -8,6 +8,7 @@ function activateStopwatch() {
     "use strict";
 
     var lap = 0;
+    var startTime = 0;
     var seconds = 0;
     var tenths = 0;
     var appendTens = document.getElementById("tenths");
@@ -26,10 +27,10 @@ function activateStopwatch() {
 
 
     buttonStart.onclick = function() {
-        var startTime = window.performance.now();
+        startTime = window.performance.now();
 
         clearInterval(Interval);
-        Interval = setInterval(startTimer(startTime), 100);
+        Interval = setInterval(startTimer, 10);
     };
 
     buttonStop.onclick = function() {
@@ -99,12 +100,37 @@ function activateStopwatch() {
 
 
     // Tock function
-    function startTimer (startTime) {
+    //function startTimer () {
+    //    tenths++;
+    //
+    //    if (tenths < 9) {
+    //        appendTens.innerHTML = "0" + tenths;
+    //    }
+    //
+    //    if (tenths > 9) {
+    //        appendTens.innerHTML = tenths;
+    //    }
+    //
+    //    if (tenths > 99) {
+    //        console.log("seconds");
+    //        seconds++;
+    //        appendSeconds.innerHTML = "0" + seconds;
+    //        tenths = 0;
+    //        appendTens.innerHTML = "0" + 0;
+    //    }
+    //
+    //    if (seconds > 9) {
+    //        appendSeconds.innerHTML = seconds;
+    //    }
+    //
+    //
+    //}
+    function startTimer () {
         var elapsed = window.performance.now() - startTime;
-        tenths = parseInt((elapsed * 1000) % 100);
-        seconds = parseInt(elapsed);
+        tenths = parseInt((elapsed % 1000)/10);
+        seconds = parseInt(elapsed/1000);
 
-        debugger
+
 
         if (tenths < 9) {
             appendTens.innerHTML = "0" + tenths;
@@ -124,5 +150,4 @@ function activateStopwatch() {
         }
 
     }
-
 }
