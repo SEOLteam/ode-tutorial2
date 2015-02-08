@@ -197,8 +197,8 @@ $(() ->
   SpringMass = React.createClass(
     getInitialState: ->
       k: 50   # Spring constant
-      m: 4   # Mass
-      A: 0.5    # Amplitude
+      m: 4    # Mass
+      A: 0    # Amplitude
       t_c: 0  # Current time
       p: 0    # Current position
       isTimeStopped: true
@@ -247,9 +247,13 @@ $(() ->
     render: ->
       elems = []
 
+      startButtonText = switch
+        when @state.A == 0 then 'DRAG MASS'
+        when @state.isTimeStopped then 'START'
+        else 'RESET'
       elems.push(
         React.createElement('div', className: 'control',
-          React.createElement('button', className: 'start-reset-button', onClick: @timeButton, if @state.isTimeStopped then 'START' else 'RESET')
+          React.createElement('button', disabled: @state.A == 0, className: 'start-reset-button', onClick: @timeButton, startButtonText)
         )
       )
 
