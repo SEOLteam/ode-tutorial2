@@ -16,7 +16,6 @@ $(() ->
   MAX_T = 4.0
   POSITION_SCALE = 300
   C_RADIUS = 8
-  Y_OFFSET = -35
   calculator = null
   setUpCalculator = (calcNode) ->
     calculator = Desmos.Calculator(calcNode,
@@ -101,7 +100,7 @@ $(() ->
   snapsvg = null
 
   Simulation = React.createClass(
-    SPRING_MASS_Y: 70
+    SPRING_MASS_Y: 50
     MAX_SPRING_WIDTH: 10
     HEIGHT: 180
 
@@ -174,7 +173,7 @@ $(() ->
         @updatePosition(@_owner.state)
       )
     render: ->
-      React.createElement('svg', className: 'svg')
+      React.createElement('svg', className: 'simulation')
   )
 
   Calculator = React.createClass(
@@ -268,7 +267,7 @@ $(() ->
           React.createElement('div', className: 'control', [
             React.createElement('h5', null, "Mass m: #{@state.m} kg"),
             React.createElement('input',
-              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '9', step: '1.0', value: @state.m, onChange: @handleChangeM)
+              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '10', step: '1.0', value: @state.m, onChange: @handleChangeM)
           ])
         )
 
@@ -295,8 +294,7 @@ $(() ->
         ))
 
       if @props.showAnimation
-        ruler = React.createElement('img', src: 'img/ruler_long.svg')
-        elems.push(React.createElement(Simulation, @state), React.createElement('div', className: 'ruler', ruler))
+        elems.push(React.createElement(Simulation, @state))
 
       if @props.showGraph
         elems.push(
