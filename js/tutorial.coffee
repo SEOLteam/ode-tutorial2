@@ -236,7 +236,7 @@ $(() ->
       if @state.isTimeStopped
         @setState isTimeStopped: false
       else
-        @setState isTimeStopped: true, t_c: 0
+        @setState isTimeStopped: true, t_c: 0, A: 0
 
     getPeriod: ->
       2 * Math.PI * Math.sqrt(@state.m / @state.k)
