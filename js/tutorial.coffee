@@ -143,7 +143,7 @@ $(() ->
         pos = 0
         prevA = null
         owner = @_owner
-        move = (dx, dy, posx, posy) =>
+        move = (dx) =>
           newA = prevA + dx * 2 / @width
           newA = Math.max(Math.min(newA, MAX_A), -MAX_A)
           owner.setState(A: newA)
