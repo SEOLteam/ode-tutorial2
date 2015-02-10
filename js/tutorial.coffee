@@ -143,8 +143,10 @@ $(() ->
         pos = 0
         prevA = null
         owner = @_owner
-        move = (dx) ->
-          owner.setState(A: parseFloat((prevA + dx / POSITION_SCALE).toFixed(2)))
+        move = (dx, dy, posx, posy) =>
+          newA = prevA + dx * 2 / @width
+          newA = Math.max(Math.min(newA, MAX_A), -MAX_A)
+          owner.setState(A: newA)
 
         isBouncing = false
         currT = 0
@@ -278,7 +280,7 @@ $(() ->
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Amplitude A: #{@state.A} m"),
+            React.createElement('h5', null, "Amplitude A: #{@state.A.toFixed(2)} m"),
             React.createElement('input',
               type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
