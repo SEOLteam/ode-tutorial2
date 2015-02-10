@@ -14,7 +14,6 @@ $(() ->
 
   MAX_A = 0.5
   MAX_T = 4.0
-  POSITION_SCALE = 300
   C_RADIUS = 8
   calculator = null
   setUpCalculator = (calcNode) ->
