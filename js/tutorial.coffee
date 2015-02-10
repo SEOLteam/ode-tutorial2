@@ -306,10 +306,6 @@ $(() ->
           React.createElement(Calculator, @state),
         )
 
-      elems.push(
-        React.createElement('div', null, "Position: #{}")
-      )
-
       React.createElement('div', null,
         elems
       )
