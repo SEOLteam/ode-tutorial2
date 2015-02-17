@@ -134,6 +134,8 @@ $(() ->
         attr(
           fill: "#41a647"
         )
+      x_axis = snapsvg.text(@width / 2 + 15, @HEIGHT * 0.8, '⟶').attr(fill: "#41a647", transform: 'S' + [4.0, 1.0])
+      snapsvg.text(@width / 2 + 62, @HEIGHT * 0.8, '+x').attr(fill: "#41a647")
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append(@spring)
