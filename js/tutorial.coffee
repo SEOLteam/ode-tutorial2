@@ -102,6 +102,7 @@ $(() ->
     SPRING_MASS_Y: 50
     MAX_SPRING_WIDTH: 10
     HEIGHT: 180
+    MID_LINE_WIDTH: 1
 
     updatePosition: (props) ->
       pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
@@ -129,6 +130,10 @@ $(() ->
       @width = @getDOMNode().offsetWidth
       snapsvg = Snap(@getDOMNode())
       snapsvg.rect(0, 0, 4, @HEIGHT)
+      snapsvg.rect((@width - @MID_LINE_WIDTH ) / 2, 0, @MID_LINE_WIDTH, @HEIGHT).
+        attr(
+          fill: "#41a647"
+        )
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append(@spring)
@@ -279,7 +284,7 @@ $(() ->
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Amplitude A: #{@state.A.toFixed(2)} m"),
+            React.createElement('h5', null, "Starting Position A: #{@state.A.toFixed(2)} m"),
             React.createElement('input',
               type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
           ])
