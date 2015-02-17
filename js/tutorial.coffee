@@ -268,7 +268,7 @@ $(() ->
       if @props.showKSlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Spring K: #{@state.k} N/m"),
+            React.createElement('h5', null, "Spring k: #{@state.k} N/m"),
             React.createElement('input',
               type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
           ])
