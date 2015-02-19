@@ -217,6 +217,7 @@ $(() ->
         showMSlider: true
         showASlider: true
         showStopwatch: false
+        showTable: true
         showAnimation: true
         showGraph: true
         periodMs: 50
@@ -304,6 +305,51 @@ $(() ->
           React.createElement('button', id: 'button-stop', 'Stop')
           React.createElement('button', id: 'button-reset', 'Reset')
         ))
+
+      # Table
+      if @props.showTable
+        elems.push(React.createElement('table', id: 'table',
+          React.createElement('tr', id: 'record-head',
+            React.createElement('td', id:'', '#')
+            React.createElement('td', id:'', 'Time (t)')
+            React.createElement('td', id:'', 'Position (x)')
+          )
+
+          React.createElement('tr', id: 'rec-row-1',
+            React.createElement('td', id:'', '1.')
+            React.createElement('td', id:'', '00:00')
+            React.createElement('td', id:'', '0.00')
+          )
+
+          React.createElement('tr', id: 'rec-row-2',
+            React.createElement('td', id:'', '2.')
+            React.createElement('td', id:'', '00:00')
+            React.createElement('td', id:'', '0.00')
+          )
+
+          React.createElement('tr', id: 'rec-row-3',
+            React.createElement('td', id:'', '3.')
+            React.createElement('td', id:'', '00:00')
+            React.createElement('td', id:'', '0.00')
+          )
+
+          React.createElement('tr', id: 'rec-row-4',
+            React.createElement('td', id:'', '4.')
+            React.createElement('td', id:'', '00:00')
+            React.createElement('td', id:'', '0.00')
+          )
+
+#          React.createElement('tr', id: 'rec-row-5',
+#            React.createElement('td', id:'', '5.')
+#            React.createElement('td', id:'', '00:00')
+#            React.createElement('td', id:'', '0.00')
+#          )
+
+          )
+          React.createElement('button', id: 'button-lap', 'Lap')
+        )
+
+
 
       if @props.showAnimation
         elems.push(React.createElement(Simulation, @state))
