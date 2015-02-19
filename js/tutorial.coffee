@@ -102,7 +102,7 @@ $(() ->
     SPRING_MASS_Y: 50
     MAX_SPRING_WIDTH: 10
     HEIGHT: 180
-    MID_LINE_WIDTH: 1
+    MID_LINE_WIDTH: 2
 
     updatePosition: (props) ->
       pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
@@ -134,8 +134,8 @@ $(() ->
         attr(
           fill: "#41a647"
         )
-      x_axis = snapsvg.text(@width / 2 + 20, @HEIGHT * 0.8, '⟶').attr(fill: "#41a647", transform: 'S' + [4.0, 1.0])
-      snapsvg.text(@width / 2 + 62, @HEIGHT * 0.8, '+x').attr(fill: "#41a647")
+      x_axis = snapsvg.text(@width / 2 + 20, @HEIGHT * 0.8, '→').attr(fill: "#41a647", transform: 'S' + [6.0, 1.0])
+      snapsvg.text(@width / 2 + 80, @HEIGHT * 0.8, '+x').attr(fill: "#41a647")
       Snap.load("img/simple_spring.svg", (frag) =>
         @spring = frag.select("g")
         snapsvg.append(@spring)
