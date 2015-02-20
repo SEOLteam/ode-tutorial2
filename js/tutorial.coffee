@@ -220,15 +220,18 @@ $(() ->
         showTable: true
         showAnimation: true
         showGraph: true
-        periodMs: 50
+        periodMs: 10
+        startTime: 0
       $.extend(defaults, getHashParams())
 
     tick: ->
       return if @state.isTimeStopped
-      new_t_c = @state.t_c + @props.periodMs / 1000 # Milliseconds per second
+      new_t_c = (window.performance.now() - @state.startTime)/1000
+      debugger
       @setState t_c: new_t_c
 
     componentDidMount: ->
+      @state.startTime = window.performance.now()
       activateStopwatch() if @props.showStopwatch
       @interval = setInterval(@tick, @props.periodMs)
 
@@ -308,7 +311,7 @@ $(() ->
 
       # Table
       if @props.showTable
-        elems.push(React.createElement('table', id: 'table',
+        elems.push(React.createElement('table', id: 'record-table',
           React.createElement('tr', id: 'record-head',
             React.createElement('td', id:'', '#')
             React.createElement('td', id:'', 'Time (t)')
@@ -316,27 +319,27 @@ $(() ->
           )
 
           React.createElement('tr', id: 'rec-row-1',
-            React.createElement('td', id:'', '1.')
-            React.createElement('td', id:'', '00:00')
-            React.createElement('td', id:'', '0.00')
+            React.createElement('td', class:'idx', '1.')
+            React.createElement('td', class:'t_c', '00:00')
+            React.createElement('td', class:'x_c', '0.00')
           )
 
           React.createElement('tr', id: 'rec-row-2',
-            React.createElement('td', id:'', '2.')
-            React.createElement('td', id:'', '00:00')
-            React.createElement('td', id:'', '0.00')
+            React.createElement('td', class:'idx', '2.')
+            React.createElement('td', class:'t_c', '00:00')
+            React.createElement('td', class:'x_c', '0.00')
           )
 
           React.createElement('tr', id: 'rec-row-3',
-            React.createElement('td', id:'', '3.')
-            React.createElement('td', id:'', '00:00')
-            React.createElement('td', id:'', '0.00')
+            React.createElement('td', class:'idx', '3.')
+            React.createElement('td', class:'t_c', '00:00')
+            React.createElement('td', class:'x_c', '0.00')
           )
 
           React.createElement('tr', id: 'rec-row-4',
-            React.createElement('td', id:'', '4.')
-            React.createElement('td', id:'', '00:00')
-            React.createElement('td', id:'', '0.00')
+            React.createElement('td', class:'idx', '4.')
+            React.createElement('td', class:'t_c', '00:00')
+            React.createElement('td', class:'x_c', '0.00')
           )
 
 #          React.createElement('tr', id: 'rec-row-5',
@@ -346,7 +349,7 @@ $(() ->
 #          )
 
           )
-          React.createElement('button', id: 'button-lap', 'Lap')
+          React.createElement('button', id: 'button-record', 'Record')
         )
 
 
