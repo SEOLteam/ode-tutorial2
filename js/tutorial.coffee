@@ -110,9 +110,6 @@ $(() ->
 
   snapsvg = null
 
-  GetCurrentPos = (state) ->
-    state['A'] * Math.cos(state['t_c'] * Math.sqrt(state['k'] / state['m']))
-
   SpringAnimation = React.createClass(
     SPRING_MASS_Y: 50
     MAX_SPRING_WIDTH: 10
@@ -120,7 +117,7 @@ $(() ->
     MID_LINE_WIDTH: 2
 
     updatePosition: (props) ->
-      pos = GetCurrentPos(props)
+      pos = props.pos
       sx = @width * (1 / 2 + pos / MAX_A / 4) / @springWidth
       sy = 1
       cy = @SPRING_MASS_Y - (@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2
@@ -213,26 +210,6 @@ $(() ->
       React.createElement('div', className: 'calculator')
   )
 
-  Table = React.createClass(
-    getInitialState: ->
-      dataPoints: []
-
-    recordPoint: ->
-      dps = @state.dataPoints
-      dps.push(@props.t_c.toFixed(1) + ' : ' + GetCurrentPos(@props).toFixed(2))
-      @setState dataPoints: dps
-
-    render: ->
-      pointElems = []
-      pointElems.push(
-        React.createElement('p', className: 'time', ["Time: ", React.createElement('span', id: 'seconds', @props.t_c.toFixed(1)), " sec"])
-      )
-      pointElems.push(React.createElement('button', onClick: @recordPoint, 'Record'))
-      for point in @state.dataPoints
-        pointElems.push(React.createElement('div', null, point))
-      React.createElement('div', id: 'stopwatch', pointElems)
-  )
-
   SpringParameters = React.createClass(
     createStartButton: ->
       startButtonText = switch
@@ -280,6 +257,14 @@ $(() ->
   )
 
   SpringMass = React.createClass(
+    clearPoints: ->
+      @setState dataPoints: []
+
+    recordPoint: ->
+      dps = @state.dataPoints
+      dps.push(@state.t_c.toFixed(1) + ' : ' + @pos.toFixed(2) + ' : ' + @vel.toFixed(2) + ' : ' + @acc.toFixed(2))
+      @setState dataPoints: dps
+
     updateHashParams: ->
       @setState(getHashParams())
 
@@ -289,26 +274,36 @@ $(() ->
         m: 4    # Mass
         A: 0    # Amplitude
         t_c: 0  # Current time
-        p: 0    # Current position
+        pos: 0  # Current position
+        vel: 0
+        acc: 0
         isTimeStopped: true
-        startTime: new Date()
+        startTime: null
+        dataPoints: []
       $.extend(state, getHashParams())
 
-    tick: ->
-      return if @state.isTimeStopped
-      new_t_c = (new Date() - @state.startTime) / 1000
-      @setState t_c: new_t_c
+    updateHashParams: ->
+      @setState $.extend({}, @state, getHashParams())
+
+    tick: (timestamp) ->
+      if !@state.isTimeStopped
+        if @state.startTime != null
+          new_t_c = (timestamp - @state.startTime) / 1000
+        else
+          new_t_c = 0
+          @setState startTime: timestamp
+        @setState t_c: new_t_c
+      window.requestAnimationFrame(@tick) if @isMounted()
 
     componentDidMount: ->
-      @interval = setInterval(@tick, @props.periodMs)
+      window.requestAnimationFrame(@tick)
       @hashChange = window.addEventListener('hashchange', @updateHashParams());
 
     componentWillUnmount: ->
-      clearInterval(@interval)
       window.removeEventListener(@hashChange)
 
     startBouncing: ->
-      @setState isTimeStopped: false, t_c: 0, startTime: new Date()
+      @setState isTimeStopped: false, t_c: 0, startTime: null
 
     handleChangeK: (event) ->
       @setState k: parseFloat(event.target.value)
@@ -320,7 +315,7 @@ $(() ->
       if @state.isTimeStopped
         @startBouncing()
       else
-        @setState isTimeStopped: true, t_c: 0
+        @setState isTimeStopped: true, t_c: 0, startTime: null
 
     getPeriod: ->
       2 * Math.PI * Math.sqrt(@state.m / @state.k)
@@ -328,13 +323,35 @@ $(() ->
     getPosition: ->
       @state.A * Math.cos(@state.A * Math.sqrt(@state.t_c / @state.m))
 
+    createChildProps: ->
+      @pos = @state['A'] * Math.cos(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
+      @vel = - Math.sqrt(@state['k'] / @state['m']) * @state['A'] * Math.sin(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
+      @acc = - @state['k'] / @state['m'] * @state['A'] * Math.cos(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
+      $.extend({}, @state,
+        pos: @pos
+        vel: @vel
+        acc: @acc
+      )
+
+    createTable: ->
+      pointElems = []
+      pointElems.push(
+        React.createElement('p', className: 'time', ["Time: ", React.createElement('span', id: 'seconds', @state.t_c.toFixed(1)), " sec"])
+      )
+      pointElems.push(React.createElement('button', onClick: @recordPoint, 'Record'))
+      pointElems.push(React.createElement('button', onClick: @clearPoints, 'Clear'))
+      for point in @state.dataPoints
+        pointElems.push(React.createElement('div', null, point))
+      React.createElement('div', id: 'stopwatch', pointElems)
+
     render: ->
       elems = []
 
-      elems.push(React.createElement(SpringParameters, @state)) if @state.showSpringParameters
-      elems.push(React.createElement(SpringAnimation, @state)) if @state.showSpringAnimation
-      elems.push(React.createElement(Table, @state)) if @state.showTable
-      elems.push(React.createElement(Graph, @state)) if @state.showGraph
+      props = @createChildProps()
+      elems.push(React.createElement(SpringParameters, props)) if @state.showSpringParameters
+      elems.push(React.createElement(SpringAnimation, props)) if @state.showSpringAnimation
+      elems.push(@createTable()) if @state.showTable
+      elems.push(React.createElement(Graph, props)) if @state.showGraph
 
       React.createElement('div', null, elems)
   )
