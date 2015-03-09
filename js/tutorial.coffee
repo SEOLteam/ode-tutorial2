@@ -220,6 +220,13 @@ $(() ->
         React.createElement('button', disabled: @props.A == 0, className: 'start-reset-button', onClick: @_owner.timeButton, startButtonText)
       )
 
+    handleChangeK: (event) ->
+      @._owner.setState k: parseFloat(event.target.value)
+    handleChangeM: (event) ->
+      @._owner.setState m: parseFloat(event.target.value)
+    handleChangeA: (event) ->
+      @._owner.setState A: parseFloat(event.target.value)
+
     render: ->
       elems = []
 
@@ -304,13 +311,6 @@ $(() ->
 
     startBouncing: ->
       @setState isTimeStopped: false, t_c: 0, startTime: null
-
-    handleChangeK: (event) ->
-      @setState k: parseFloat(event.target.value)
-    handleChangeM: (event) ->
-      @setState m: parseFloat(event.target.value)
-    handleChangeA: (event) ->
-      @setState A: parseFloat(event.target.value)
     timeButton: (event) ->
       if @state.isTimeStopped
         @startBouncing()
