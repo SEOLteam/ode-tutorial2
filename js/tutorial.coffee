@@ -1,16 +1,28 @@
 $(() ->
   getHashParams = ->
     hash = location.hash.split('?')
-    return {} unless hash.length >= 2
+    defaults =
+      showSpringParameters: true
+      showSpringAnimation: true
+      showTable: false
+      showGraph: true
+      showKSlider: true
+      showMSlider: true
+      showASlider: true
+      periodMs: 50
+    return defaults unless hash.length >= 2
     state = {}
     for pair in hash[1].split("&")
       [key, val] = pair.split("=").map(decodeURIComponent)
-      try
-        val = eval(val)
-      catch evalFailed
+      if val == 'true'
+        val = true
+      else if val == 'false'
+        val = false
+      else
+        possibleNumber = Number(val)
+        val = possibleNumber unless isNaN(possibleNumber)
       state[key] = val
-    state
-
+    $.extend(defaults, state)
 
   MAX_A = 0.5
   MAX_T = 4.0
@@ -94,18 +106,21 @@ $(() ->
           }
         ]
     )
-    calculator # TODO NOOO!!
+    calculator
 
   snapsvg = null
 
-  Simulation = React.createClass(
+  GetCurrentPos = (state) ->
+    state['A'] * Math.cos(state['t_c'] * Math.sqrt(state['k'] / state['m']))
+
+  SpringAnimation = React.createClass(
     SPRING_MASS_Y: 50
     MAX_SPRING_WIDTH: 10
     HEIGHT: 180
     MID_LINE_WIDTH: 2
 
     updatePosition: (props) ->
-      pos = props['A'] * Math.cos(props['t_c'] * Math.sqrt(props['k'] / props['m']))
+      pos = GetCurrentPos(props)
       sx = @width * (1 / 2 + pos / MAX_A / 4) / @springWidth
       sy = 1
       cy = @SPRING_MASS_Y - (@spring.node.getBoundingClientRect().top - @spring.node.getBoundingClientRect().bottom) / 2
@@ -155,7 +170,6 @@ $(() ->
           owner.setState(A: newA)
 
         isBouncing = false
-        currT = 0
         velocity = 0
 
         start = =>
@@ -164,18 +178,15 @@ $(() ->
           owner.setState(isTimeStopped: true)
           isBouncing = false
           velocity = 0
-          currT = 0
           @notDragging = false
           @circle.data 'origTransform', @circle.transform().local
           return
 
         stop = =>
-          owner.setState isTimeStopped: false
+          owner.startBouncing()
           isBouncing = true
-          currT = 0
           return
 
-        # TODO rect.drag move, start, stop
         @circle.drag move, start, stop
 
         @updatePosition(@_owner.state)
@@ -184,7 +195,7 @@ $(() ->
       React.createElement('svg', className: 'simulation')
   )
 
-  Calculator = React.createClass(
+  Graph = React.createClass(
     updateExpression: (id, val) ->
       @desmosCalc.setExpression
         id: id
@@ -202,37 +213,102 @@ $(() ->
       React.createElement('div', className: 'calculator')
   )
 
-  SpringMass = React.createClass(
+  Table = React.createClass(
     getInitialState: ->
-      k: 50   # Spring constant
-      m: 4    # Mass
-      A: 0    # Amplitude
-      t_c: 0  # Current time
-      p: 0    # Current position
-      isTimeStopped: true
+      dataPoints: []
 
-    getDefaultProps: ->
-      defaults =
-        showKSlider: true
-        showMSlider: true
-        showASlider: true
-        showStopwatch: false
-        showAnimation: true
-        showGraph: true
-        periodMs: 50
-      $.extend(defaults, getHashParams())
+    recordPoint: ->
+      dps = @state.dataPoints
+      dps.push(@props.t_c.toFixed(1) + ' : ' + GetCurrentPos(@props).toFixed(2))
+      @setState dataPoints: dps
+
+    render: ->
+      pointElems = []
+      pointElems.push(
+        React.createElement('p', className: 'time', ["Time: ", React.createElement('span', id: 'seconds', @props.t_c.toFixed(1)), " sec"])
+      )
+      pointElems.push(React.createElement('button', onClick: @recordPoint, 'Record'))
+      for point in @state.dataPoints
+        pointElems.push(React.createElement('div', null, point))
+      React.createElement('div', id: 'stopwatch', pointElems)
+  )
+
+  SpringParameters = React.createClass(
+    createStartButton: ->
+      startButtonText = switch
+        when @props.A == 0 then 'DRAG MASS'
+        when @props.isTimeStopped then 'START'
+        else 'RESET'
+      React.createElement('div', className: 'control',
+        React.createElement('button', disabled: @props.A == 0, className: 'start-reset-button', onClick: @_owner.timeButton, startButtonText)
+      )
+
+    render: ->
+      elems = []
+
+      unless @props.showStopwatch
+        elems.push @createStartButton()
+
+      if @props.showKSlider
+        elems.push(
+          React.createElement('div', className: 'control', [
+            React.createElement('h5', null, "Spring k: #{@props.k} N/m"),
+            React.createElement('input',
+              type: 'range', disabled: !@props.isTimeStopped, min: '1', max: '100', step: '1.0', value: @props.k, onChange: @handleChangeK)
+          ])
+        )
+
+      if @props.showMSlider
+        elems.push(
+          React.createElement('div', className: 'control', [
+            React.createElement('h5', null, "Mass m: #{@props.m} kg"),
+            React.createElement('input',
+              type: 'range', disabled: !@props.isTimeStopped, min: '1', max: '7', step: '1.0', value: @props.m, onChange: @handleChangeM)
+          ])
+        )
+
+      if @props.showASlider
+        elems.push(
+          React.createElement('div', className: 'control', [
+            React.createElement('h5', null, "Starting Position A: #{@props.A.toFixed(1)} m"),
+            React.createElement('input',
+              type: 'range', disabled: !@props.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @props.A, onChange: @handleChangeA)
+          ])
+        )
+
+      React.createElement('div', null, elems)
+  )
+
+  SpringMass = React.createClass(
+    updateHashParams: ->
+      @setState(getHashParams())
+
+    getInitialState: ->
+      state =
+        k: 50   # Spring constant
+        m: 4    # Mass
+        A: 0    # Amplitude
+        t_c: 0  # Current time
+        p: 0    # Current position
+        isTimeStopped: true
+        startTime: new Date()
+      $.extend(state, getHashParams())
 
     tick: ->
       return if @state.isTimeStopped
-      new_t_c = @state.t_c + @props.periodMs / 1000 # Milliseconds per second
+      new_t_c = (new Date() - @state.startTime) / 1000
       @setState t_c: new_t_c
 
     componentDidMount: ->
-      activateStopwatch() if @props.showStopwatch
       @interval = setInterval(@tick, @props.periodMs)
+      @hashChange = window.addEventListener('hashchange', @updateHashParams());
 
     componentWillUnmount: ->
-      clearInterval @interval
+      clearInterval(@interval)
+      window.removeEventListener(@hashChange)
+
+    startBouncing: ->
+      @setState isTimeStopped: false, t_c: 0, startTime: new Date()
 
     handleChangeK: (event) ->
       @setState k: parseFloat(event.target.value)
@@ -242,9 +318,9 @@ $(() ->
       @setState A: parseFloat(event.target.value)
     timeButton: (event) ->
       if @state.isTimeStopped
-        @setState isTimeStopped: false
+        @startBouncing()
       else
-        @setState isTimeStopped: true, t_c: 0, A: 0
+        @setState isTimeStopped: true, t_c: 0
 
     getPeriod: ->
       2 * Math.PI * Math.sqrt(@state.m / @state.k)
@@ -255,67 +331,12 @@ $(() ->
     render: ->
       elems = []
 
-      startButtonText = switch
-        when @state.A == 0 then 'DRAG MASS'
-        when @state.isTimeStopped then 'START'
-        else 'RESET'
-      elems.push(
-        React.createElement('div', className: 'control',
-          React.createElement('button', disabled: @state.A == 0, className: 'start-reset-button', onClick: @timeButton, startButtonText)
-        )
-      )
+      elems.push(React.createElement(SpringParameters, @state)) if @state.showSpringParameters
+      elems.push(React.createElement(SpringAnimation, @state)) if @state.showSpringAnimation
+      elems.push(React.createElement(Table, @state)) if @state.showTable
+      elems.push(React.createElement(Graph, @state)) if @state.showGraph
 
-      if @props.showKSlider
-        elems.push(
-          React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Spring k: #{@state.k} N/m"),
-            React.createElement('input',
-              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '100', step: '1.0', value: @state.k, onChange: @handleChangeK)
-          ])
-        )
-
-      if @props.showMSlider
-        elems.push(
-          React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Mass m: #{@state.m} kg"),
-            React.createElement('input',
-              type: 'range', disabled: !@state.isTimeStopped, min: '1', max: '10', step: '1.0', value: @state.m, onChange: @handleChangeM)
-          ])
-        )
-
-      if @props.showASlider
-        elems.push(
-          React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Starting Position A: #{@state.A.toFixed(2)} m"),
-            React.createElement('input',
-              type: 'range', disabled: !@state.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @state.A, onChange: @handleChangeA)
-          ])
-        )
-
-      # Stopwatch
-      if @props.showStopwatch
-        elems.push(React.createElement('div', id: 'stopwatch',
-          React.createElement('p', className: 'time',
-            React.createElement('span', id: 'seconds', '00')
-            ':'
-            React.createElement('span', id: 'tenths', '00')
-          )
-          React.createElement('button', id: 'button-start', 'Start')
-          React.createElement('button', id: 'button-stop', 'Stop')
-          React.createElement('button', id: 'button-reset', 'Reset')
-        ))
-
-      if @props.showAnimation
-        elems.push(React.createElement(Simulation, @state))
-
-      if @props.showGraph
-        elems.push(
-          React.createElement(Calculator, @state),
-        )
-
-      React.createElement('div', null,
-        elems
-      )
+      React.createElement('div', null, elems)
   )
 
   React.render(React.createElement(SpringMass), document.getElementById('app'))
