@@ -225,8 +225,7 @@ $(() ->
     render: ->
       elems = []
 
-      unless @props.showStopwatch
-        elems.push @createStartButton()
+      elems.push @createStartButton()
 
       if @props.showKSlider
         elems.push(
