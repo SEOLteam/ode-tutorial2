@@ -166,22 +166,15 @@ $(() ->
           newA = Math.max(Math.min(newA, MAX_A), -MAX_A)
           owner.setState(A: newA)
 
-        isBouncing = false
-        velocity = 0
-
         start = =>
           prevA = owner.state.A
           owner.setState(t_c: 0.0)
           owner.setState(isTimeStopped: true)
-          isBouncing = false
-          velocity = 0
           @notDragging = false
           @circle.data 'origTransform', @circle.transform().local
           return
 
         stop = =>
-          owner.startBouncing()
-          isBouncing = true
           return
 
         @circle.drag move, start, stop
