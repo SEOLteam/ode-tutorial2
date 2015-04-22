@@ -263,7 +263,12 @@ $(() ->
 
     recordPoint: ->
       dps = @state.dataPoints
-      dps.push(@state.t_c.toFixed(1) + ' : ' + @pos.toFixed(2) + ' : ' + @vel.toFixed(2) + ' : ' + @acc.toFixed(2))
+      dps.push(
+        t: @state.t_c,
+        p: @pos,
+        v: @vel,
+        a: @acc
+      )
       @setState dataPoints: dps
 
     updateHashParams: ->
@@ -335,8 +340,22 @@ $(() ->
       )
       pointElems.push(React.createElement('button', onClick: @recordPoint, 'Record'))
       pointElems.push(React.createElement('button', onClick: @clearPoints, 'Clear'))
+      tableRows = []
+      if @state.dataPoints.length > 0
+        tableRows.push(React.createElement('tr', null, [
+          React.createElement('th', null, 'Time'),
+          React.createElement('th', null, 'Position'),
+          React.createElement('th', null, 'Velocity'),
+          React.createElement('th', null, 'Acceleration')
+        ]))
       for point in @state.dataPoints
-        pointElems.push(React.createElement('div', null, point))
+        tableRows.push(React.createElement('tr', null, [
+          React.createElement('td', null, point.t.toFixed(2)),
+          React.createElement('td', null, point.p.toFixed(2)),
+          React.createElement('td', null, point.v.toFixed(2)),
+          React.createElement('td', null, point.a.toFixed(2))
+        ]))
+      pointElems.push(React.createElement('table', style: {margin: 'auto auto'}, tableRows))
       React.createElement('div', id: 'stopwatch', pointElems)
 
     render: ->
@@ -345,7 +364,7 @@ $(() ->
       props = @createChildProps()
       elems.push(React.createElement(SpringParameters, props)) if @state.showSpringParameters
       elems.push(React.createElement(SpringAnimation, props)) if @state.showSpringAnimation
-      elems.push(@createTable()) if @state.showTable
+      elems.push(@createTable()) if @state.showStopwatch
       elems.push(React.createElement(Graph, props)) if @state.showGraph
 
       React.createElement('div', null, elems)
