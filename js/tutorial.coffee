@@ -143,9 +143,9 @@ $(() ->
       snapsvg = Snap(@getDOMNode())
       snapsvg.rect(0, 0, 4, @HEIGHT)
       snapsvg.rect((@width - @MID_LINE_WIDTH ) / 2, 0, @MID_LINE_WIDTH, @HEIGHT).
-        attr(
-          fill: "#41a647"
-        )
+      attr(
+        fill: "#41a647"
+      )
       x_axis = snapsvg.text(@width / 2 + 20, @HEIGHT * 0.8, '→').attr(fill: "#41a647", transform: 'S' + [6.0, 1.0])
       snapsvg.text(@width / 2 + 80, @HEIGHT * 0.8, '+x').attr(fill: "#41a647")
       Snap.load("img/simple_spring.svg", (frag) =>
@@ -215,9 +215,11 @@ $(() ->
       startButtonText = switch
         when @props.A == 0 then 'DRAG MASS'
         when @props.isTimeStopped then 'START'
-        else 'RESET'
+        else
+          'RESET'
       React.createElement('div', className: 'control',
-        React.createElement('button', disabled: @props.A == 0, className: 'start-reset-button', onClick: @_owner.timeButton, startButtonText)
+        React.createElement('button',
+          disabled: @props.A == 0, className: 'start-reset-button', onClick: @_owner.timeButton, startButtonText)
       )
 
     handleChangeK: (event) ->
@@ -254,9 +256,9 @@ $(() ->
       if @props.showASlider
         elems.push(
           React.createElement('div', className: 'control', [
-            React.createElement('h5', null, "Starting Position A: #{@props.A.toFixed(1)} m"),
+            React.createElement('h5', null, "Starting Position A: #{@props.A.toFixed(2)} m"),
             React.createElement('input',
-              type: 'range', disabled: !@props.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.1', value: @props.A, onChange: @handleChangeA)
+              type: 'range', disabled: !@props.isTimeStopped, min: -MAX_A, max: MAX_A, step: '0.001', value: @props.A, onChange: @handleChangeA)
           ])
         )
 
@@ -325,8 +327,8 @@ $(() ->
 
     createChildProps: ->
       @pos = @state['A'] * Math.cos(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
-      @vel = - Math.sqrt(@state['k'] / @state['m']) * @state['A'] * Math.sin(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
-      @acc = - @state['k'] / @state['m'] * @state['A'] * Math.cos(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
+      @vel = -Math.sqrt(@state['k'] / @state['m']) * @state['A'] * Math.sin(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
+      @acc = -@state['k'] / @state['m'] * @state['A'] * Math.cos(@state['t_c'] * Math.sqrt(@state['k'] / @state['m']))
       $.extend({}, @state,
         pos: @pos
         vel: @vel
@@ -336,7 +338,8 @@ $(() ->
     createTable: ->
       pointElems = []
       pointElems.push(
-        React.createElement('p', className: 'time', ["Time: ", React.createElement('span', id: 'seconds', @state.t_c.toFixed(1)), " sec"])
+        React.createElement('p', className: 'time',
+          ["Time: ", React.createElement('span', id: 'seconds', @state.t_c.toFixed(1)), " sec"])
       )
       pointElems.push(React.createElement('button', onClick: @recordPoint, 'Record'))
       pointElems.push(React.createElement('button', onClick: @clearPoints, 'Clear'))
